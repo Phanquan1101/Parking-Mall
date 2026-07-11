@@ -114,6 +114,20 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: These match the approved SAD stack while keeping Slice 0 lightweight.
 - Consequences: The web app contains static placeholders only, and Vision Service exposes only `GET /health` until Slice 10.
 
+## ADR-017
+
+- Status: Accepted
+- Decision: Slice 1 uses BCrypt-hashed in-memory demo users and signed JWT access tokens.
+- Rationale: This creates a testable login and role foundation without adding a database or migration before the identity data model is approved.
+- Consequences: `admin`, `staff`, and `merchant` are local-demo accounts only and must be replaced by persistent user storage before production.
+
+## ADR-018
+
+- Status: Accepted
+- Decision: API Gateway forwards bearer tokens to Identity Service; Identity Service validates JWTs.
+- Rationale: Keeping token validation with the issuing service is the smallest maintainable Slice 1 boundary.
+- Consequences: Gateway proxies only auth endpoints in this slice and does not perform parking or payment routing.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

@@ -46,6 +46,52 @@ Common error codes: `UNAUTHORIZED`, `FORBIDDEN`, `VALIDATION_ERROR`, `NOT_FOUND`
 | POST | `/api/auth/login` | Public | Login and receive JWT |
 | GET | `/api/auth/me` | Authenticated | Return current user and roles |
 
+### POST `/api/auth/login`
+
+Request:
+
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+
+Response:
+
+```json
+{
+  "accessToken": "jwt-token",
+  "tokenType": "Bearer",
+  "expiresIn": 3600,
+  "user": {
+    "id": "usr_admin",
+    "username": "admin",
+    "displayName": "System Admin",
+    "roles": ["ADMIN"]
+  }
+}
+```
+
+Slice 1 uses BCrypt-hashed in-memory demo users only. Invalid credentials return `401`.
+
+### GET `/api/auth/me`
+
+Requires `Authorization: Bearer <accessToken>`.
+
+Response:
+
+```json
+{
+  "id": "usr_admin",
+  "username": "admin",
+  "displayName": "System Admin",
+  "roles": ["ADMIN"]
+}
+```
+
+Gateway behavior: `/api/auth/login` is public and proxied to Identity Service; `/api/auth/me` forwards the bearer token and Identity Service validates it.
+
 ## 4. Parking
 
 | Method | Path | Role | Purpose |

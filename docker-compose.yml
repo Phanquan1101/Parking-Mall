@@ -1,11 +1,26 @@
 name: parkflow-mall
 
-# Slice 0 foundation only. Service build/run definitions are added in their
-# owning vertical slices after their contracts and configuration are approved.
-# No database, Supabase, SePay, OCR model, or credentials are provisioned here.
-services: {}
+services:
+  identity-service:
+    build:
+      context: ./services/identity-service
+    environment:
+      IDENTITY_SERVICE_PORT: 8081
+      JWT_SECRET: ${JWT_SECRET:-parkflow-local-development-secret-change-me-2026}
+      JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-3600}
+    ports:
+      - "${IDENTITY_SERVICE_PORT:-8081}:8081"
 
-# Planned local components:
-# - api-gateway, identity-service, parking-service, payment-service
-# - merchant-service, reservation-service, reporting-service, vision-service
-# - web
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+    depends_on:
+      - identity-service
+    environment:
+      API_GATEWAY_PORT: 8080
+      IDENTITY_SERVICE_BASE_URL: http://identity-service:8081
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+    ports:
+      - "${API_GATEWAY_PORT:-8080}:8080"
+
+# Slice 1 contains no database, Supabase, SePay, OCR model, or other domain services.

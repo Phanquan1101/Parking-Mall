@@ -23,7 +23,19 @@ Every vertical slice must include:
 | Offline tests | Validate local queue/sync | Browser offline mode, simulated network cut |
 | Payment tests | Validate simulation/webhook/idempotency | Simulated webhook payloads |
 
-## 3. Core parking tests
+## 3. Slice 1 identity and gateway tests
+
+| Test ID | Scenario | Expected Result | Priority |
+|---|---|---|---|
+| TC-AUTH-001 | Admin logs in with valid demo credentials | JWT response contains Bearer token, expiry, user, and `ADMIN` role | P0 |
+| TC-AUTH-002 | Login uses wrong password | `401 Unauthorized` | P0 |
+| TC-AUTH-003 | Request `/api/auth/me` without bearer token | `401 Unauthorized` | P0 |
+| TC-AUTH-004 | Request `/api/auth/me` with valid token | Current user and role list returned | P0 |
+| TC-GATE-001 | Gateway application context loads | Gateway configuration starts | P0 |
+| TC-GATE-002 | Gateway login route | Request is proxied to Identity Service | P0 |
+| TC-GATE-003 | Gateway profile route | Authorization header is forwarded to Identity Service | P0 |
+
+## 4. Core parking tests
 
 | Test ID | Scenario | Expected Result | Priority |
 |---|---|---|---|
@@ -39,7 +51,7 @@ Every vertical slice must include:
 | TC-PARK-010 | Reuse Exit Pass after successful check-out | Rejected TOKEN_ALREADY_USED | P0 |
 | TC-PARK-011 | Expired Exit Pass | Rejected TOKEN_EXPIRED | P0 |
 
-## 4. Payment tests
+## 5. Payment tests
 
 | Test ID | Scenario | Expected Result | Priority |
 |---|---|---|---|
@@ -52,7 +64,7 @@ Every vertical slice must include:
 | TC-PAY-007 | SePay duplicate provider transaction | No double-pay | P1 |
 | TC-PAY-008 | Webhook saved before processing | Raw event exists even if processing fails | P1 |
 
-## 5. QR security tests
+## 6. QR security tests
 
 | Test ID | Scenario | Expected Result | Priority |
 |---|---|---|---|
@@ -63,7 +75,7 @@ Every vertical slice must include:
 | TC-QR-005 | Use Exit Pass twice | Second use rejected | P0 |
 | TC-QR-006 | Use Exit Pass after TTL | Rejected | P0 |
 
-## 6. Offline tests
+## 7. Offline tests
 
 | Test ID | Scenario | Expected Result | Priority |
 |---|---|---|---|
@@ -76,7 +88,7 @@ Every vertical slice must include:
 | TC-OFF-007 | Dashboard shows pending sync count | Admin sees pending/conflict status | P0 |
 | TC-OFF-008 | Offline queue survives browser refresh | Events remain until sync | P1 |
 
-## 7. Merchant validation tests
+## 8. Merchant validation tests
 
 | Test ID | Scenario | Expected Result | Priority |
 |---|---|---|---|
@@ -87,7 +99,7 @@ Every vertical slice must include:
 | TC-MER-005 | Merchant validates invoice for tenant they do not belong to | Forbidden | P0 |
 | TC-MER-006 | Discount exceeds fee | Final fee becomes 0, not negative | P0 |
 
-## 8. Reservation tests
+## 9. Reservation tests
 
 | Test ID | Scenario | Expected Result | Priority |
 |---|---|---|---|
@@ -99,7 +111,7 @@ Every vertical slice must include:
 | TC-RES-006 | Check-in too early | Rejected with business message | P1 |
 | TC-RES-007 | Check-in too late | EXPIRED/NO_SHOW or normal parking fallback | P1 |
 
-## 9. OCR tests
+## 10. OCR tests
 
 | Test ID | Scenario | Expected Result | Priority |
 |---|---|---|---|
@@ -108,7 +120,7 @@ Every vertical slice must include:
 | TC-OCR-003 | OCR timeout | Staff can continue with manual plate entry | P1 |
 | TC-OCR-004 | OCR service unavailable | Parking flow remains usable manually | P1 |
 
-## 10. Dashboard tests
+## 11. Dashboard tests
 
 | Test ID | Scenario | Expected Result | Priority |
 |---|---|---|---|
@@ -118,7 +130,7 @@ Every vertical slice must include:
 | TC-DASH-004 | Suspicious session created | Alert count visible | P0 |
 | TC-DASH-005 | Merchant discount applied | Discount total visible | P1 |
 
-## 11. Security/access tests
+## 12. Security/access tests
 
 | Test ID | Scenario | Expected Result | Priority |
 |---|---|---|---|
@@ -128,7 +140,7 @@ Every vertical slice must include:
 | TC-SEC-004 | Public ticket token guesses random token | 404 or invalid token | P0 |
 | TC-SEC-005 | Image URL direct access without permission | Denied or signed URL required | P1 |
 
-## 12. Documentation alignment additions
+## 13. Documentation alignment additions
 
 The following cases close the remaining BRD/PRD rule coverage gaps and are mapped to canonical rule IDs.
 
@@ -152,7 +164,7 @@ The following cases close the remaining BRD/PRD rule coverage gaps and are mappe
 
 Every test should retain the baseline happy-path, invalid-input, unauthorized-role, idempotency, offline, and audit checks required by the project rules.
 
-## 13. Canonical scenario checklist
+## 14. Canonical scenario checklist
 
 | Scenario | Expected Result | Rule/Area |
 |---|---|---|

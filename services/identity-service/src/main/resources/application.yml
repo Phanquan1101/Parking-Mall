@@ -10,3 +10,8 @@ management:
     web:
       exposure:
         include: health,info
+
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:parkflow-local-development-secret-change-me-2026}
+    jwt-expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}

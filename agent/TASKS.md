@@ -19,11 +19,11 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-0101 | Prepare identity-service skeleton | P0 | Structure and health contract documented | TODO |
-| T-0102 | Draft users, roles, and JWT contract | P0 | Admin, Parking Staff, Merchant Staff roles defined | TODO |
-| T-0103 | Draft login contract | P0 | `/api/auth/login` request/response documented | TODO |
-| T-0104 | Draft protected-route authorization | P0 | Unauthorized and forbidden behavior documented | TODO |
-| T-0105 | Prepare API Gateway route map | P0 | Canonical paths route to owning services | TODO |
+| T-0101 | Prepare identity-service skeleton | P0 | Structure and health contract documented | DONE |
+| T-0102 | Draft users, roles, and JWT contract | P0 | Admin, Parking Staff, Merchant Staff roles defined | DONE |
+| T-0103 | Draft login contract | P0 | `/api/auth/login` request/response documented | DONE |
+| T-0104 | Draft protected-route authorization | P0 | Unauthorized and forbidden behavior documented | DONE |
+| T-0105 | Prepare API Gateway route map | P0 | Canonical paths route to owning services | DONE |
 
 ## Slice 2 - Parking Session + QR Lookup
 

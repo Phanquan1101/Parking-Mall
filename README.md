@@ -4,9 +4,9 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
-Slice 0 - Repository Foundation is complete. The repository contains runnable skeletons and documentation contracts only; no domain or business logic has been implemented.
+Slice 1 - API Gateway + Identity Skeleton is complete. The repository includes demo-only in-memory authentication and gateway auth routing; parking, payment, QR, and other domain logic remain unimplemented.
 
-Next slice: Slice 1 - API Gateway + Identity Skeleton.
+Next slice: Slice 2 - Parking Session + QR Lookup.
 
 ## Tech stack
 
@@ -48,6 +48,26 @@ mvn spring-boot:run
 ```
 
 Then visit `http://localhost:8080/actuator/health`.
+
+For Slice 1, run Identity Service first, then API Gateway:
+
+```powershell
+cd services/identity-service
+mvn spring-boot:run
+```
+
+```powershell
+cd services/api-gateway
+mvn spring-boot:run
+```
+
+Demo credentials are in-memory only and must not be used outside local development:
+
+| Username | Password | Role |
+|---|---|---|
+| `admin` | `admin123` | `ADMIN` |
+| `staff` | `staff123` | `PARKING_STAFF` |
+| `merchant` | `merchant123` | `MERCHANT_STAFF` |
 
 Run the web placeholder:
 
