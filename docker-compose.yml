@@ -1,0 +1,11 @@
+name: parkflow-mall
+
+# Slice 0 foundation only. Service build/run definitions are added in their
+# owning vertical slices after their contracts and configuration are approved.
+# No database, Supabase, SePay, OCR model, or credentials are provisioned here.
+services: {}
+
+# Planned local components:
+# - api-gateway, identity-service, parking-service, payment-service
+# - merchant-service, reservation-service, reporting-service, vision-service
+# - web
