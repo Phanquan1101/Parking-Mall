@@ -1,1 +1,6 @@
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\api-gateway\src\main\java\com\parkflow\mall\gateway\ApiGatewayApplication.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\api-gateway\src\main\java\com\parkflow\mall\gateway\config\GatewayConfig.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\api-gateway\src\main\java\com\parkflow\mall\gateway\controller\AuthGatewayController.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\api-gateway\src\main\java\com\parkflow\mall\gateway\controller\ParkingGatewayController.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\api-gateway\src\main\java\com\parkflow\mall\gateway\parking\ParkingServiceProxy.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\api-gateway\src\main\java\com\parkflow\mall\gateway\service\IdentityServiceProxy.java

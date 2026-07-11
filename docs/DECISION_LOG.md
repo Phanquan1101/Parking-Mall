@@ -128,6 +128,20 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: Keeping token validation with the issuing service is the smallest maintainable Slice 1 boundary.
 - Consequences: Gateway proxies only auth endpoints in this slice and does not perform parking or payment routing.
 
+## ADR-019
+
+- Status: Accepted
+- Decision: Slice 2 stores parking sessions in an in-memory repository behind `ParkingSessionRepository`.
+- Rationale: It enables the first check-in and lookup workflow without introducing a database, Supabase connection, or migration before persistence is approved.
+- Consequences: Sessions disappear on restart and the repository implementation must be replaced by parking-schema persistence in a later slice.
+
+## ADR-020
+
+- Status: Accepted
+- Decision: Parking Service independently validates Identity-issued JWTs using the shared `JWT_SECRET` configuration.
+- Rationale: This avoids an Identity Service round-trip for each protected parking request while a shared auth package does not yet exist.
+- Consequences: Identity and Parking Service must use compatible signing configuration; Gateway forwards the bearer token without validating it.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

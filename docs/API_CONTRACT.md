@@ -104,6 +104,24 @@ Gateway behavior: `/api/auth/login` is public and proxied to Identity Service; `
 
 Check-in and check-out mutations accept `Idempotency-Key`.
 
+### Slice 2 implemented parking endpoints
+
+`POST /api/parking/sessions/check-in` requires `ADMIN` or `PARKING_STAFF` JWT authentication. Slice 2 accepts `MANUAL` plate source only and returns an `ACTIVE`, `UNPAID` session with opaque `qrLookupToken` and `ticketUrl`.
+
+```json
+{
+  "vehiclePlate": "59A1-12345",
+  "vehicleType": "MOTORBIKE",
+  "entryGate": "GATE_IN_01",
+  "staffId": "staff-demo-id",
+  "plateSource": "MANUAL"
+}
+```
+
+`GET /api/parking/sessions/{sessionId}` and `GET /api/parking/sessions?status=&plate=` require the same roles. Slice 2 storage is in-memory only.
+
+`POST /api/parking/sessions/{sessionId}/check-out` and manual override remain future canonical contract endpoints; they are intentionally not implemented in Slice 2.
+
 ## 5. Public ticket and Exit Pass
 
 | Method | Path | Role | Purpose |
@@ -111,6 +129,10 @@ Check-in and check-out mutations accept `Idempotency-Key`.
 | GET | `/api/public/tickets/{lookupToken}` | Public lookup token | Show safe session summary, fee estimate, and payment state |
 | POST | `/api/parking/sessions/{sessionId}/exit-passes` | Public lookup context, `PARKING_STAFF`, `ADMIN` | Create a pass only for `PAID` or zero-fee session |
 | POST | `/api/parking/exit-passes/{exitPassToken}/validate` | `PARKING_STAFF`, `ADMIN` | Validate pass before gate decision |
+
+### Slice 2 public ticket lookup
+
+`GET /api/public/tickets/{lookupToken}` is public. It returns session and parking status, fee fields set to zero, and the statement that the lookup token cannot authorize exit. It never exposes `staffId`, internal events, or token metadata. Invalid tokens return `404`.
 
 Exit authorization requires all of the following:
 

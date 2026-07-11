@@ -1,1 +1,13 @@
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\config\SecurityConfig.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\controller\AuthController.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\dto\LoginRequest.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\dto\LoginResponse.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\dto\UserResponse.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\IdentityServiceApplication.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\model\DemoUser.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\model\Role.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\security\AuthenticatedUser.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\security\JwtAuthenticationFilter.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\security\JwtService.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\service\AuthenticationService.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\identity-service\src\main\java\com\parkflow\mall\identity\service\DemoUserStore.java

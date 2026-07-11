@@ -1,1 +1,3 @@
 com\parkflow\mall\gateway\ApiGatewayApplication.class
+com\parkflow\mall\gateway\controller\ParkingGatewayController.class
+com\parkflow\mall\gateway\parking\ParkingServiceProxy.class

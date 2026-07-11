@@ -8,3 +8,8 @@ management:
     web:
       exposure:
         include: health,info
+
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:parkflow-local-development-secret-change-me-2026}
+  public-ticket-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}

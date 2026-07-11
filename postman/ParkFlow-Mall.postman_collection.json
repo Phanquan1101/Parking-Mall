@@ -1,0 +1,49 @@
+{
+  "info": {
+    "name": "ParkFlow Mall - Slice 2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "accessToken", "value": "" },
+    { "key": "qrLookupToken", "value": "" },
+    { "key": "sessionId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Login Parking Staff",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"staff\",\n  \"password\": \"staff123\"\n}" },
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.collectionVariables.set('accessToken', pm.response.json().accessToken);"] } }]
+    },
+    {
+      "name": "Auth Me",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": "{{baseUrl}}/api/auth/me"
+      }
+    },
+    {
+      "name": "Parking Check-in",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"vehiclePlate\": \"59A1-12345\",\n  \"vehicleType\": \"MOTORBIKE\",\n  \"entryGate\": \"GATE_IN_01\",\n  \"staffId\": \"staff-demo-id\",\n  \"plateSource\": \"MANUAL\"\n}" },
+        "url": "{{baseUrl}}/api/parking/sessions/check-in"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["const body = pm.response.json();", "pm.collectionVariables.set('qrLookupToken', body.qrLookupToken);", "pm.collectionVariables.set('sessionId', body.sessionId);"] } }]
+    },
+    {
+      "name": "Public Ticket Lookup",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/public/tickets/{{qrLookupToken}}"
+      }
+    }
+  ]
+}

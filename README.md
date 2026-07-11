@@ -4,9 +4,9 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
-Slice 1 - API Gateway + Identity Skeleton is complete. The repository includes demo-only in-memory authentication and gateway auth routing; parking, payment, QR, and other domain logic remain unimplemented.
+Slice 2 - Parking Session + QR Lookup is complete. Parking Staff and Admin can create in-memory ACTIVE sessions, receive opaque lookup tokens, and expose public ticket lookup. Payment, exit authorization, and all later parking features remain unimplemented.
 
-Next slice: Slice 2 - Parking Session + QR Lookup.
+Next slice: Slice 3 - Customer Ticket Page.
 
 ## Tech stack
 
@@ -49,7 +49,7 @@ mvn spring-boot:run
 
 Then visit `http://localhost:8080/actuator/health`.
 
-For Slice 1, run Identity Service first, then API Gateway:
+For Slice 2, run Identity Service first, then Parking Service and API Gateway:
 
 ```powershell
 cd services/identity-service
@@ -61,6 +61,11 @@ cd services/api-gateway
 mvn spring-boot:run
 ```
 
+```powershell
+cd services/parking-service
+mvn spring-boot:run
+```
+
 Demo credentials are in-memory only and must not be used outside local development:
 
 | Username | Password | Role |
@@ -68,6 +73,23 @@ Demo credentials are in-memory only and must not be used outside local developme
 | `admin` | `admin123` | `ADMIN` |
 | `staff` | `staff123` | `PARKING_STAFF` |
 | `merchant` | `merchant123` | `MERCHANT_STAFF` |
+
+Create an in-memory session through the gateway after logging in as `staff`:
+
+```powershell
+curl.exe -X POST "http://localhost:8080/api/parking/sessions/check-in" `
+  -H "Authorization: Bearer <accessToken>" `
+  -H "Content-Type: application/json" `
+  -d '{"vehiclePlate":"59A1-12345","vehicleType":"MOTORBIKE","entryGate":"GATE_IN_01","staffId":"staff-demo-id","plateSource":"MANUAL"}'
+```
+
+Open the returned `ticketUrl`, or use:
+
+```powershell
+curl.exe "http://localhost:8080/api/public/tickets/<qrLookupToken>"
+```
+
+Parking sessions are in-memory only for Slice 2 and disappear when Parking Service restarts.
 
 Run the web placeholder:
 

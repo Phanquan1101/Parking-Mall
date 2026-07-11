@@ -51,6 +51,21 @@ Every vertical slice must include:
 | TC-PARK-010 | Reuse Exit Pass after successful check-out | Rejected TOKEN_ALREADY_USED | P0 |
 | TC-PARK-011 | Expired Exit Pass | Rejected TOKEN_EXPIRED | P0 |
 
+### Slice 2 implemented coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-S2-PARK-001 | Authorized staff check-in | ACTIVE/UNPAID session, code, and opaque lookup token returned | Implemented |
+| TC-S2-PARK-002 | Plate normalization | Spaces and dashes are removed; plate is uppercased | Implemented |
+| TC-S2-PARK-003 | Missing plate | `400 Bad Request` | Implemented |
+| TC-S2-PARK-004 | Duplicate ACTIVE normalized plate | `409 Conflict` | Implemented |
+| TC-S2-PARK-005 | Public ticket lookup | Ticket lookup works without login | Implemented |
+| TC-S2-PARK-006 | Invalid public token | Safe `404 Not Found` | Implemented |
+| TC-S2-PARK-007 | Public ticket response | Does not expose staff ID or token metadata | Implemented |
+| TC-S2-PARK-008 | Protected check-in without JWT | `401 Unauthorized` | Implemented |
+| TC-S2-PARK-009 | Merchant role check-in attempt | `403 Forbidden` | Implemented |
+| TC-S2-PARK-010 | Check-out route guard | No check-out endpoint exists in Slice 2 | Implemented |
+
 ## 5. Payment tests
 
 | Test ID | Scenario | Expected Result | Priority |

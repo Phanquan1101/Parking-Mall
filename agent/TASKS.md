@@ -29,11 +29,11 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-0201 | Draft parking session schema | P0 | Canonical session states and fields documented | TODO |
-| T-0202 | Draft check-in contract | P0 | Staff-confirmed plate creates an official session | TODO |
-| T-0203 | Draft QR Lookup Token contract | P0 | Opaque lookup token exposes no sensitive data | TODO |
-| T-0204 | Draft public ticket lookup | P0 | `/api/public/tickets/{lookupToken}` returns safe data only | TODO |
-| T-0205 | Add parking audit acceptance criteria | P0 | Check-in and plate confirmation are auditable | TODO |
+| T-0201 | Draft parking session schema | P0 | Canonical session states and fields documented | DONE |
+| T-0202 | Draft check-in contract | P0 | Staff-confirmed plate creates an official session | DONE |
+| T-0203 | Draft QR Lookup Token contract | P0 | Opaque lookup token exposes no sensitive data | DONE |
+| T-0204 | Draft public ticket lookup | P0 | `/api/public/tickets/{lookupToken}` returns safe data only | DONE |
+| T-0205 | Add parking audit acceptance criteria | P0 | Check-in and plate confirmation are auditable | DONE |
 
 ## Slice 3 - Customer Ticket Page
 

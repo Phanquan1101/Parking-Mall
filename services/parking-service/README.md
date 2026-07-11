@@ -1,7 +1,15 @@
 # Parking Service
 
-Responsibility: future parking sessions, check-in/check-out, QR Lookup, Dynamic Exit Pass, offline synchronization, and parking fraud signals.
+Responsibility: parking sessions, QR Lookup, future check-in/check-out, Dynamic Exit Pass, offline synchronization, and parking fraud signals.
 
-Current status: Skeleton only. Actuator health is available at `/actuator/health`; no parking, QR, exit, or offline logic exists.
+Current status: Slice 2 in-memory check-in and QR Lookup. Supported endpoints are protected check-in/session search and public ticket lookup. Actuator health remains available at `/actuator/health`.
 
-Business logic starts: Slice 2 - Parking Session + QR Lookup.
+Session storage is intentionally in-memory behind `ParkingSessionRepository`. It has no database, payment, check-out, Exit Pass, or offline synchronization implementation.
+
+Run locally:
+
+```powershell
+mvn spring-boot:run
+```
+
+Default port: `8082` (`PARKING_SERVICE_PORT`).
