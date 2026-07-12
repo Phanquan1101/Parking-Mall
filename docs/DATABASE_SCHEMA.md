@@ -139,11 +139,9 @@ MVP provider modes are `SIMULATION` and `SEPAY_TEST`; `SEPAY_LIVE` remains disab
 
 ### reservations
 
-`id` PK, `reservation_code` unique, `vehicle_plate`, `vehicle_type`, `zone_code`, `reserved_start_time`, `reserved_end_time`, `checkin_window_start`, `checkin_window_end`, `status`, `payment_order_id`, `slot_hold_id`, `created_at`, `updated_at`.
+`id` PK, `reservation_code` unique, `vehicle_plate`, `normalized_vehicle_plate`, `vehicle_type`, `customer_name`, `customer_phone`, `reserved_start_time`, `reserved_end_time`, `expires_at`, `status`, `cancelled_at`, `cancel_reason`, `consumed_at`, `consumed_by_parking_session_id`, `consume_request_id`, `created_at`, `updated_at`. Slice 9 uses this shape in memory only; no migration is created.
 
-Canonical reservation statuses:
-
-`DRAFT`, `PENDING_PAYMENT`, `CONFIRMED`, `CHECKED_IN`, `EXPIRED`, `NO_SHOW`, `CANCELLED`, `PENDING_RECONCILIATION`.
+Slice 9 canonical statuses are `RESERVED`, `CANCELLED`, `EXPIRED`, and `CONSUMED`. A future payment-enabled reservation design may introduce `DRAFT`, `PENDING_PAYMENT`, `CONFIRMED`, `CHECKED_IN`, `NO_SHOW`, and `PENDING_RECONCILIATION`; none are implemented in Slice 9.
 
 ### reservation_slot_holds
 

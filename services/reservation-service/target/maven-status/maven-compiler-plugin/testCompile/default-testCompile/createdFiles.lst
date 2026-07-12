@@ -1,1 +1,3 @@
+com\parkflow\mall\reservation\ReservationServiceExpiryTests.class
+com\parkflow\mall\reservation\ReservationWorkflowTests.class
 com\parkflow\mall\reservation\ReservationServiceApplicationTests.class

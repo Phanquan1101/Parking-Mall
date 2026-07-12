@@ -1,1 +1,16 @@
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\config\SecurityConfig.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\controller\ReservationController.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\dto\CancelReservationRequest.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\dto\ConsumeReservationRequest.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\dto\CreateReservationRequest.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\dto\ExpireReservationsResponse.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\dto\ReservationResponse.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\model\Reservation.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\model\ReservationStatus.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\model\VehicleType.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\repository\InMemoryReservationRepository.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\repository\ReservationRepository.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\ReservationServiceApplication.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\security\JwtAuthenticationFilter.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\security\Role.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\reservation-service\src\main\java\com\parkflow\mall\reservation\service\ReservationService.java

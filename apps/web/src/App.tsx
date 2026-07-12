@@ -3,6 +3,8 @@ import { CustomerTicketPage } from "./pages/CustomerTicketPage";
 import { HomePage } from "./pages/HomePage";
 import { StaffOfflinePage } from "./pages/StaffOfflinePage";
 import { MerchantValidationPage } from "./pages/MerchantValidationPage";
+import { ReservationNewPage } from "./pages/ReservationNewPage";
+import { ReservationPage } from "./pages/ReservationPage";
 
 export default function App() {
   return (
@@ -11,6 +13,8 @@ export default function App() {
       <Route path="/tickets/:lookupToken?" element={<CustomerTicketPage />} />
       <Route path="/staff/offline" element={<StaffOfflinePage />} />
       <Route path="/merchant/validate" element={<MerchantValidationPage />} />
+      <Route path="/reservations/new" element={<ReservationNewPage />} />
+      <Route path="/reservations/:reservationCode" element={<ReservationPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

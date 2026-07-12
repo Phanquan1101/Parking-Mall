@@ -16,5 +16,8 @@ public record ParkingSessionResponse(
         Instant entryTime,
         String entryGate,
         String qrLookupToken,
+        String reservationId,
+        String reservationCode,
+        boolean createdFromReservation,
         String ticketUrl) {
 }

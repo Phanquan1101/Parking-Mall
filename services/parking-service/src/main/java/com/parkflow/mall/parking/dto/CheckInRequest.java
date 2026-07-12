@@ -8,5 +8,6 @@ public record CheckInRequest(
         VehicleType vehicleType,
         String entryGate,
         String staffId,
-        PlateSource plateSource) {
+        PlateSource plateSource,
+        String reservationCode) {
 }

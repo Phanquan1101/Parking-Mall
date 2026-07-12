@@ -53,6 +53,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 
 @Service
 public class ParkingSessionService {
@@ -64,6 +70,9 @@ public class ParkingSessionService {
     private final String publicTicketBaseUrl;
     private final long demoFlatFee;
     private final long exitPassTtlSeconds;
+    private final RestTemplate restTemplate;
+    private final String reservationServiceBaseUrl;
+    private final String internalServiceToken;
     private final AtomicLong sequence = new AtomicLong();
     private final Map<String, MerchantDiscountState> merchantDiscounts = new ConcurrentHashMap<>();
 
@@ -74,7 +83,10 @@ public class ParkingSessionService {
             ParkingSessionEventRecorder eventRecorder,
             @Value("${app.public-ticket-base-url}") String publicTicketBaseUrl,
             @Value("${app.demo-flat-fee:5000}") long demoFlatFee,
-            @Value("${app.exit-pass-ttl-seconds:60}") long exitPassTtlSeconds) {
+            @Value("${app.exit-pass-ttl-seconds:60}") long exitPassTtlSeconds,
+            RestTemplate restTemplate,
+            @Value("${app.reservation-service-base-url}") String reservationServiceBaseUrl,
+            @Value("${app.internal-service-token}") String internalServiceToken) {
         this.repository = repository;
         this.exitPassRepository = exitPassRepository;
         this.offlineEventRepository = offlineEventRepository;
@@ -82,9 +94,12 @@ public class ParkingSessionService {
         this.publicTicketBaseUrl = publicTicketBaseUrl.replaceAll("/$", "");
         this.demoFlatFee = demoFlatFee;
         this.exitPassTtlSeconds = exitPassTtlSeconds;
+        this.restTemplate = restTemplate;
+        this.reservationServiceBaseUrl = reservationServiceBaseUrl.replaceAll("/$", "");
+        this.internalServiceToken = internalServiceToken;
     }
 
-    public ParkingSessionResponse checkIn(CheckInRequest request, AuthenticatedUser actor) {
+    public synchronized ParkingSessionResponse checkIn(CheckInRequest request, AuthenticatedUser actor) {
         if (request == null || request.vehiclePlate() == null || request.vehiclePlate().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "vehiclePlate is required");
         }
@@ -100,11 +115,19 @@ public class ParkingSessionService {
         }
 
         Instant now = Instant.now();
+        String sessionId = UUID.randomUUID().toString();
+        String reservationId = null;
+        if (!isBlank(request.reservationCode())) {
+            if (repository.existsActiveByNormalizedPlate(normalizedPlate)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "An ACTIVE session already exists for this vehicle plate");
+            }
+            reservationId = consumeReservation(request.reservationCode(), request.vehiclePlate(), request.vehicleType(), sessionId);
+        }
         ParkingSession session = new ParkingSession(
-                UUID.randomUUID().toString(), nextSessionCode(now), normalizedPlate, normalizedPlate,
+                sessionId, nextSessionCode(now), normalizedPlate, normalizedPlate,
                 request.vehicleType(), ParkingSessionStatus.ACTIVE, PaymentStatus.UNPAID, now,
                 request.entryGate().trim(), actor.id(), PlateSource.MANUAL, nextToken(), null, null, null,
-                null, null, null, false, null, null, null, now, now);
+                null, null, null, false, null, null, null, reservationId, request.reservationCode(), now, now);
         if (!repository.saveIfNoActive(session)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "An ACTIVE session already exists for this vehicle plate");
         }
@@ -243,7 +266,7 @@ public class ParkingSessionService {
                 session.vehicleType(), ParkingSessionStatus.PAID, PaymentStatus.PAID, session.entryTime(), session.entryGate(), session.staffId(),
                 session.plateSource(), session.qrLookupToken(), request.paymentOrderId(), request.amountPaid(), request.paidAt(),
                 session.exitTime(), session.exitGate(), session.exitPlate(), session.manualOverride(), session.manualOverrideReason(),
-                session.suspiciousReason(), session.lastExitPassId(), session.createdAt(), now));
+                session.suspiciousReason(), session.lastExitPassId(), session.reservationId(), session.reservationCode(), session.createdAt(), now));
         eventRecorder.record(new ParkingSessionEvent("PAYMENT_CONFIRMED", sessionId, "payment-service", now));
         return new InternalPaymentUpdateResponse(sessionId, PaymentStatus.PAID, request.amountPaid(), true);
     }
@@ -333,7 +356,7 @@ public class ParkingSessionService {
         Instant now = Instant.now();
         ParkingSession session = new ParkingSession(UUID.randomUUID().toString(), nextSessionCode(now), normalizedPlate, normalizedPlate,
                 vehicleType, ParkingSessionStatus.ACTIVE, PaymentStatus.UNPAID, now, payload.entryGate().trim(), actor.id(), PlateSource.MANUAL,
-                nextToken(), null, null, null, null, null, null, false, null, null, null, now, now);
+                nextToken(), null, null, null, null, null, null, false, null, null, null, null, null, now, now);
         if (!repository.saveIfNoActive(session)) {
             return persistOfflineResult(request, deviceId, syncRequestKey, actor, payload, OfflineSyncStatus.CONFLICT, null, null,
                     "Offline check-in conflicts with an active server session.", "ACTIVE_SESSION_FOR_NORMALIZED_PLATE");
@@ -401,7 +424,7 @@ public class ParkingSessionService {
         return new ParkingSession(session.id(), session.sessionCode(), session.vehiclePlate(), session.normalizedPlate(), session.vehicleType(),
                 session.status(), session.paymentStatus(), session.entryTime(), session.entryGate(), session.staffId(), session.plateSource(),
                 session.qrLookupToken(), session.paymentOrderId(), session.amountPaid(), session.paidAt(), session.exitTime(), session.exitGate(),
-                session.exitPlate(), session.manualOverride(), session.manualOverrideReason(), session.suspiciousReason(), passId, session.createdAt(), now);
+                session.exitPlate(), session.manualOverride(), session.manualOverrideReason(), session.suspiciousReason(), passId, session.reservationId(), session.reservationCode(), session.createdAt(), now);
     }
 
     private ParkingSession copyExited(ParkingSession session, String exitGate, String exitPlate, boolean manualOverride,
@@ -409,7 +432,7 @@ public class ParkingSessionService {
         return new ParkingSession(session.id(), session.sessionCode(), session.vehiclePlate(), session.normalizedPlate(), session.vehicleType(),
                 ParkingSessionStatus.EXITED, session.paymentStatus(), session.entryTime(), session.entryGate(), session.staffId(), session.plateSource(),
                 session.qrLookupToken(), session.paymentOrderId(), session.amountPaid(), session.paidAt(), now, exitGate.trim(), exitPlate,
-                manualOverride, manualOverrideReason, suspiciousReason, session.lastExitPassId(), session.createdAt(), now);
+                manualOverride, manualOverrideReason, suspiciousReason, session.lastExitPassId(), session.reservationId(), session.reservationCode(), session.createdAt(), now);
     }
 
     private CheckOutResponse toCheckOutResponse(ParkingSession session, boolean manualOverride, String reason, String message) {
@@ -439,8 +462,20 @@ public class ParkingSessionService {
 
     private ParkingSessionResponse toStaffResponse(ParkingSession session) {
         return new ParkingSessionResponse(session.id(), session.sessionCode(), session.vehiclePlate(), session.normalizedPlate(), session.vehicleType(),
-                session.status(), session.paymentStatus(), session.entryTime(), session.entryGate(), session.qrLookupToken(),
+                session.status(), session.paymentStatus(), session.entryTime(), session.entryGate(), session.qrLookupToken(), session.reservationId(), session.reservationCode(), session.reservationId() != null,
                 publicTicketBaseUrl + "/api/public/tickets/" + session.qrLookupToken());
+    }
+
+    private String consumeReservation(String reservationCode, String vehiclePlate, VehicleType vehicleType, String sessionId) {
+        HttpHeaders headers = new HttpHeaders(); headers.setContentType(MediaType.APPLICATION_JSON); headers.set("X-Internal-Service-Token", internalServiceToken);
+        String body = "{\"vehiclePlate\":\"" + vehiclePlate.replace("\\\"", "") + "\",\"vehicleType\":\"" + vehicleType.name() + "\",\"parkingSessionId\":\"" + sessionId + "\",\"checkInRequestId\":\"" + UUID.randomUUID() + "\"}";
+        try {
+            var response = restTemplate.exchange(reservationServiceBaseUrl + "/internal/reservations/" + reservationCode + "/consume", HttpMethod.POST, new HttpEntity<>(body, headers), java.util.Map.class);
+            Object id = response.getBody() == null ? null : response.getBody().get("reservationId");
+            if (id == null) throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Reservation service returned an invalid consume response");
+            return id.toString();
+        } catch (HttpStatusCodeException exception) { throw new ResponseStatusException(exception.getStatusCode(), "Reservation validation failed"); }
+          catch (org.springframework.web.client.ResourceAccessException exception) { throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Reservation service unavailable"); }
     }
 
     private ExitPassException exitError(HttpStatus status, String code, String message) { return new ExitPassException(status, code, message); }

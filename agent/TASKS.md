@@ -98,11 +98,11 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-0901 | Draft reservation and slot-hold schema | P1 | Hold expiry and canonical statuses documented | TODO |
-| T-0902 | Draft reservation endpoint set | P1 | Create, retrieve, cancel, check-in, and reconciliation paths documented | TODO |
-| T-0903 | Confirm reservation after payment | P1 | Confirmation requires paid order and valid hold | TODO |
-| T-0904 | Release expired/unpaid holds | P1 | Expired/no-show behavior documented | TODO |
-| T-0905 | Handle `PENDING_RECONCILIATION` | P1 | Payment success/confirmation failure is recoverable | TODO |
+| T-0901 | Implement in-memory reservation model | P1 | Opaque code, expiry, and canonical Slice 9 statuses implemented | DONE |
+| T-0902 | Implement basic reservation endpoints | P1 | Public create/get/cancel and staff list/expire endpoints exist | DONE |
+| T-0903 | Consume reservation during Parking check-in | P1 | Internal token-protected consume creates a normal session only after validation | DONE |
+| T-0904 | Release expired reservations | P1 | Stale `RESERVED` records become `EXPIRED` and release capacity | DONE |
+| T-0905 | Defer reservation payment/reconciliation | P1 | Payment/deposit and `PENDING_RECONCILIATION` remain out of Slice 9 | DONE |
 
 ## Slice 10 - OCR Assist
 

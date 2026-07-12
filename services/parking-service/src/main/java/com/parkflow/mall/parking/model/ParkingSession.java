@@ -25,6 +25,8 @@ public record ParkingSession(
         String manualOverrideReason,
         String suspiciousReason,
         String lastExitPassId,
+        String reservationId,
+        String reservationCode,
         Instant createdAt,
         Instant updatedAt) {
 }

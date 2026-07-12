@@ -256,6 +256,18 @@ The following cases close the remaining BRD/PRD rule coverage gaps and are mappe
 
 Every test should retain the baseline happy-path, invalid-input, unauthorized-role, idempotency, offline, and audit checks required by the project rules.
 
+## 15. Slice 9 automated reservation coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-RES-011 | Create, lookup, and cancel public reservation | Opaque code and `RESERVED`/`CANCELLED` lifecycle | Automated |
+| TC-RES-012 | Invalid time, duplicate active plate, and capacity | Safe validation/conflict response | Automated |
+| TC-RES-013 | Internal consume token and plate/type validation | Missing/invalid token and mismatches are rejected | Automated |
+| TC-RES-014 | Consume lifecycle | Matching reservation is `CONSUMED`; a different retry is rejected | Automated |
+| TC-RES-015 | Staff/admin list and expire authorization | Staff/Admin allowed; Merchant denied | Automated |
+| TC-RES-016 | Parking check-in with reservation code | Internal consume is called and normal `UNPAID` session stores reservation fields | Automated |
+| TC-RES-017 | Gateway reservation routes | Public and protected routes forward correctly; internal consume is hidden | Automated |
+
 ## 14. Canonical scenario checklist
 
 | Scenario | Expected Result | Rule/Area |

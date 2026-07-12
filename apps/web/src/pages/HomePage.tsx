@@ -18,6 +18,7 @@ export function HomePage() {
         <div className="route-hint">
           Ticket links use the format <code>/tickets/&#123;lookupToken&#125;</code>.
         </div>
+        <Link className="primary-button" to="/reservations/new">Reserve parking</Link>
       </main>
     </div>
   );

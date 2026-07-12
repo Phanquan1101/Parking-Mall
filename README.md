@@ -4,13 +4,15 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
-Slice 8 - Payment Reconciliation is complete. In-memory reconciliation can expire pending orders, expose mismatches for review, and retry failed protected Parking payment updates.
+Slice 9 - Reservation Basic is complete. Customers can create, look up, and cancel in-memory reservations; staff can use a reservation code during normal check-in.
 
-Next slice: Slice 9 - Reservation Basic.
+Next slice: Slice 10 - OCR Assist.
 
 Slice 8 admin demo: log in as `admin`, then call `POST /api/payments/reconciliation/run` and inspect `GET /api/payments/reconciliation/items`. Reconciliation is in-memory only; it uses no SePay or real banking and never refunds, creates an Exit Pass, or checks out a vehicle.
 
 Merchant demo: open `http://localhost:5173/merchant/validate`, paste a Merchant/Admin JWT, enter the QR Lookup Token plus invoice code/amount. The demo rule applies a `5000` discount when aggregate eligible invoices reach `300000`; invoice codes are globally single-use.
+
+Reservation demo: open `http://localhost:5173/reservations/new`, create a reservation, and copy its opaque code. A staff user includes `reservationCode` in the normal parking check-in request. Parking consumes the reservation over its internal service route, then creates a normal `UNPAID` Parking Session. Slice 9 has no reservation payment or deposit.
 
 ## Tech stack
 

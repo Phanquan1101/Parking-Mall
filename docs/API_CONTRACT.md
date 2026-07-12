@@ -213,13 +213,14 @@ The demo policy is `AGGREGATE_INVOICE`: at total eligible amount `300000`, apply
 
 | Method | Path | Role | Purpose |
 |---|---|---|---|
-| POST | `/api/reservations` | Customer, `ADMIN` | Create a reservation and temporary slot hold |
-| GET | `/api/reservations/{reservationId}` | Customer, `PARKING_STAFF`, `ADMIN` | Retrieve reservation state |
-| POST | `/api/reservations/{reservationId}/cancel` | Customer, `ADMIN` | Cancel an eligible reservation |
-| POST | `/api/reservations/{reservationId}/check-in` | `PARKING_STAFF`, `ADMIN` | Convert confirmed reservation to parking session |
-| POST | `/api/reservations/reconciliation/run` | `ADMIN`, scheduler, internal service | Reconcile reservation/payment inconsistency |
+| POST | `/api/reservations` | Public | Create an in-memory reservation |
+| GET | `/api/reservations/{reservationCode}` | Public | Retrieve reservation by opaque code |
+| POST | `/api/reservations/{reservationCode}/cancel` | Public | Cancel a `RESERVED` reservation |
+| GET | `/api/reservations?status=&vehiclePlate=` | `PARKING_STAFF`, `ADMIN` | List reservations |
+| POST | `/api/reservations/expire` | `PARKING_STAFF`, `ADMIN` | Mark stale reservations expired |
+| POST | `/internal/reservations/{reservationCode}/consume` | Internal only | Consume a matching reservation for Parking check-in |
 
-Reservation supports `PENDING_RECONCILIATION`. Refund and live payment flows are out of MVP.
+Slice 9 statuses are `RESERVED`, `CANCELLED`, `EXPIRED`, and `CONSUMED`. Internal consume requires `X-Internal-Service-Token`, is not Gateway-routed, and rejects mismatched plate/type or reused codes. A normal parking check-in can include optional `reservationCode`; a successful consume produces an ordinary `UNPAID` parking session. Reservation payment, deposits, refunds, and reconciliation are not part of Slice 9.
 
 ## 10. OCR Assist
 

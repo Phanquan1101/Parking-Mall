@@ -239,6 +239,13 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: It proves pending/failed Parking-update recovery before external provider integration.
 - Consequences: Reconciliation retries only protected internal Parking payment updates and never refunds, checks out vehicles, creates Exit Passes, or uses SePay.
 
+## ADR-035
+
+- Status: Accepted
+- Decision: Slice 9 uses an in-memory Reservation repository with public customer create/get/cancel endpoints and an internal token-protected consume endpoint used only by Parking Service.
+- Rationale: It demonstrates a safe basic reservation/check-in lifecycle without database migrations, payments, deposits, or physical slot assignment.
+- Consequences: `RESERVED`, `CANCELLED`, `EXPIRED`, and `CONSUMED` are supported. A consumed reservation creates no payment state and does not bypass ordinary Parking payment, merchant, Exit Pass, or checkout rules.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

@@ -1,1 +1,16 @@
+com\parkflow\mall\reservation\dto\ConsumeReservationRequest.class
+com\parkflow\mall\reservation\controller\ReservationController.class
+com\parkflow\mall\reservation\config\SecurityConfig.class
+com\parkflow\mall\reservation\dto\CreateReservationRequest.class
+com\parkflow\mall\reservation\service\ReservationService.class
+com\parkflow\mall\reservation\dto\ExpireReservationsResponse.class
+com\parkflow\mall\reservation\security\Role.class
+com\parkflow\mall\reservation\repository\ReservationRepository.class
 com\parkflow\mall\reservation\ReservationServiceApplication.class
+com\parkflow\mall\reservation\dto\CancelReservationRequest.class
+com\parkflow\mall\reservation\model\ReservationStatus.class
+com\parkflow\mall\reservation\dto\ReservationResponse.class
+com\parkflow\mall\reservation\security\JwtAuthenticationFilter.class
+com\parkflow\mall\reservation\model\VehicleType.class
+com\parkflow\mall\reservation\model\Reservation.class
+com\parkflow\mall\reservation\repository\InMemoryReservationRepository.class

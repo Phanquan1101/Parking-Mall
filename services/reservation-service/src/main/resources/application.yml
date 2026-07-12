@@ -8,3 +8,10 @@ management:
     web:
       exposure:
         include: health,info
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:parkflow-local-development-secret-change-me-2026}
+  internal-service-token: ${INTERNAL_SERVICE_TOKEN:parkflow-local-internal-token-change-me}
+  motorbike-capacity: ${RESERVATION_MOTORBIKE_CAPACITY:20}
+  car-capacity: ${RESERVATION_CAR_CAPACITY:10}
+  default-hold-minutes: ${RESERVATION_DEFAULT_HOLD_MINUTES:60}

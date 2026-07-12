@@ -26,6 +26,10 @@ import com.parkflow.mall.parking.model.ExitPass;
 import com.parkflow.mall.parking.model.ExitPassStatus;
 import com.parkflow.mall.parking.repository.ExitPassRepository;
 import com.parkflow.mall.parking.repository.ParkingSessionRepository;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.test.web.client.MockRestServiceServer;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,6 +48,26 @@ class ParkingServiceApplicationTests {
 
     @Autowired
     private ParkingSessionRepository parkingSessionRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Test
+    void reservationCheckInConsumesReservationAndCreatesNormalUnpaidSession() throws Exception {
+        MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
+        server.expect(requestTo("http://localhost:8085/internal/reservations/RSV-demo/consume"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("X-Internal-Service-Token", "parkflow-local-internal-token-change-me"))
+                .andRespond(withSuccess("{\"reservationId\":\"reservation-1\",\"status\":\"CONSUMED\"}", MediaType.APPLICATION_JSON));
+        String plate = nextPlate();
+        MvcResult result = mockMvc.perform(post("/api/parking/sessions/check-in").header("Authorization", "Bearer " + staffToken())
+                        .contentType(MediaType.APPLICATION_JSON).content(checkInPayload(plate).replace("}", ",\"reservationCode\":\"RSV-demo\"}")))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.reservationId").value("reservation-1"))
+                .andExpect(jsonPath("$.reservationCode").value("RSV-demo")).andExpect(jsonPath("$.paymentStatus").value("UNPAID")).andReturn();
+        server.verify();
+        String sessionId = objectMapper.readTree(result.getResponse().getContentAsString()).path("sessionId").asText();
+        org.junit.jupiter.api.Assertions.assertEquals("RSV-demo", parkingSessionRepository.findById(sessionId).orElseThrow().reservationCode());
+    }
 
     @Test
     void checkInCreatesActiveSessionWithOpaqueLookupToken() throws Exception {
