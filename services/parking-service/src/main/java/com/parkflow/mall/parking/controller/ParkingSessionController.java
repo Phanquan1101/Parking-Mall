@@ -5,6 +5,13 @@ import com.parkflow.mall.parking.dto.ParkingSessionResponse;
 import com.parkflow.mall.parking.dto.PublicTicketResponse;
 import com.parkflow.mall.parking.dto.InternalPaymentUpdateRequest;
 import com.parkflow.mall.parking.dto.InternalPaymentUpdateResponse;
+import com.parkflow.mall.parking.dto.GenerateExitPassRequest;
+import com.parkflow.mall.parking.dto.ExitPassResponse;
+import com.parkflow.mall.parking.dto.ValidateExitPassRequest;
+import com.parkflow.mall.parking.dto.ValidateExitPassResponse;
+import com.parkflow.mall.parking.dto.CheckOutRequest;
+import com.parkflow.mall.parking.dto.CheckOutResponse;
+import com.parkflow.mall.parking.dto.ManualOverrideRequest;
 import com.parkflow.mall.parking.security.AuthenticatedUser;
 import com.parkflow.mall.parking.service.ParkingSessionService;
 import java.util.List;
@@ -54,6 +61,36 @@ public class ParkingSessionController {
     @GetMapping("/api/public/tickets/{lookupToken}")
     public PublicTicketResponse publicTicket(@PathVariable String lookupToken) {
         return parkingSessionService.publicTicket(lookupToken);
+    }
+
+    @PostMapping("/api/parking/sessions/{sessionId}/exit-passes")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ExitPassResponse generateExitPass(@PathVariable String sessionId, @RequestBody GenerateExitPassRequest request) {
+        return parkingSessionService.generateExitPass(sessionId, request);
+    }
+
+    @PostMapping("/api/parking/exit-passes/{exitPassToken}/validate")
+    public ValidateExitPassResponse validateExitPass(
+            @PathVariable String exitPassToken,
+            @RequestBody ValidateExitPassRequest request,
+            @AuthenticationPrincipal AuthenticatedUser actor) {
+        return parkingSessionService.validateExitPass(exitPassToken, request, actor);
+    }
+
+    @PostMapping("/api/parking/sessions/{sessionId}/check-out")
+    public CheckOutResponse checkOut(
+            @PathVariable String sessionId,
+            @RequestBody CheckOutRequest request,
+            @AuthenticationPrincipal AuthenticatedUser actor) {
+        return parkingSessionService.checkOut(sessionId, request, actor);
+    }
+
+    @PostMapping("/api/parking/sessions/{sessionId}/manual-override")
+    public CheckOutResponse manualOverride(
+            @PathVariable String sessionId,
+            @RequestBody ManualOverrideRequest request,
+            @AuthenticationPrincipal AuthenticatedUser actor) {
+        return parkingSessionService.manualOverride(sessionId, request, actor);
     }
 
     @PostMapping("/internal/parking/sessions/{sessionId}/payment-status")

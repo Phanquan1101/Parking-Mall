@@ -89,6 +89,24 @@ Every vertical slice must include:
 | TC-S4-PAY-005 | Internal payment update | Valid internal token marks session `PAID`; invalid token is rejected | Implemented |
 | TC-S4-PAY-006 | Customer ticket after simulation | Public ticket shows `PAID`; no Exit Pass is displayed | Implemented |
 
+### Slice 5 implemented coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-S5-EXIT-001 | Paid session creates Exit Pass | Opaque `ACTIVE` pass has expiry and 60-second default TTL | Implemented |
+| TC-S5-EXIT-002 | Unpaid session creates Exit Pass | Rejected with `SESSION_NOT_PAID` | Implemented |
+| TC-S5-EXIT-003 | Invalid or other-session lookup token | Exit Pass creation is rejected | Implemented |
+| TC-S5-EXIT-004 | Replacement Exit Pass | Previous active pass becomes `INVALIDATED` | Implemented |
+| TC-S5-EXIT-005 | Valid pass and matching plate | Staff validation returns `valid=true` | Implemented |
+| TC-S5-EXIT-006 | Expired, unknown, or used pass | Safe rejection with specific Exit Pass error code | Implemented |
+| TC-S5-EXIT-007 | QR Lookup supplied as Exit Pass | Rejected as `EXIT_PASS_NOT_FOUND` | Implemented |
+| TC-S5-EXIT-008 | Plate mismatch | Validation/check-out rejected and lightweight event recorded | Implemented |
+| TC-S5-EXIT-009 | Valid check-out | Session becomes `EXITED` and pass becomes `USED` | Implemented |
+| TC-S5-EXIT-010 | Manual override | Requires paid/zero-fee session and nonblank reason; records event | Implemented |
+| TC-S5-SEC-001 | No JWT or merchant JWT at staff validation | `401` or `403`; ADMIN and PARKING_STAFF accepted | Implemented |
+| TC-S5-GATE-001 | Gateway Exit Pass routes | Public create and protected validate/check-out routes forward correctly | Implemented |
+| TC-S5-WEB-001 | Paid customer ticket | Generate Exit Pass button and issued-pass warning render | Build verified |
+
 ## 5. Payment tests
 
 | Test ID | Scenario | Expected Result | Priority |

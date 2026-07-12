@@ -4,9 +4,9 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
-Slice 4 - Payment Simulation is complete. Customers can create an in-memory payment order from the public ticket page and simulate payment success; Parking then reflects `PAID`. No real money is used and SePay Live is disabled.
+Slice 5 - Dynamic Exit Pass + Check-out is complete. A paid customer can generate a short-lived, one-time Exit Pass; authorized staff can validate the pass and matching plate before checking out the vehicle. QR Lookup remains ticket lookup only.
 
-Next slice: Slice 5 - Dynamic Exit Pass + Check-out.
+Next slice: Slice 6 - Offline Staff Mode.
 
 ## Tech stack
 
@@ -160,7 +160,16 @@ Manual Slice 3 demo flow:
 4. Open `http://localhost:5173/tickets/<qrLookupToken>`.
 5. Confirm the summary renders and an invalid token shows the safe not-found message.
 
-For Slice 4, create a payment order on that ticket page, simulate success, and confirm the ticket changes to `PAID`. Simulation Mode uses no real money; SePay Live remains disabled.
+Manual Slice 5 demo flow:
+
+1. Log in as `staff` and create a parking session.
+2. Open its customer ticket, create a payment order, then simulate payment success.
+3. Generate the Exit Pass from the ticket page after it shows `PAID`.
+4. As staff, validate the pass and matching plate at `POST /api/parking/exit-passes/{exitPassToken}/validate`.
+5. Check out the same session at `POST /api/parking/sessions/{sessionId}/check-out`.
+6. Confirm the ticket/session status is `EXITED`; reusing the pass is rejected.
+
+QR Lookup Token cannot authorize exit. Dynamic Exit Pass is opaque, short-lived (60 seconds by default), and one-time use. Staff manual override still requires payment verification and a reason.
 
 Run the vision placeholder:
 

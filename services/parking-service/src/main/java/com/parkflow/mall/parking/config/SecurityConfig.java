@@ -20,7 +20,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health", "/actuator/info", "/error", "/api/public/tickets/**", "/internal/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/parking/sessions/*/exit-passes").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/parking/sessions/check-in").hasAnyRole("ADMIN", "PARKING_STAFF")
+                        .requestMatchers(HttpMethod.POST, "/api/parking/exit-passes/*/validate", "/api/parking/sessions/*/check-out", "/api/parking/sessions/*/manual-override").hasAnyRole("ADMIN", "PARKING_STAFF")
                         .requestMatchers(HttpMethod.GET, "/api/parking/sessions/**").hasAnyRole("ADMIN", "PARKING_STAFF")
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception

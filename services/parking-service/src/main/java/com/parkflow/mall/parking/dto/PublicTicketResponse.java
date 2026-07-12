@@ -17,5 +17,8 @@ public record PublicTicketResponse(
         long estimatedFee,
         long discountAmount,
         long finalFee,
+        boolean canGenerateExitPass,
+        boolean exitPassAvailable,
+        String exitPassMessage,
         String message) {
 }

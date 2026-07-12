@@ -178,6 +178,27 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: Prevent host-port conflicts, support IntelliJ debugging, and preserve full container testing.
 - Consequences: Frontend API base URL differs by mode, documentation must clearly state the active mode, and Docker service-to-service URLs use internal Compose names.
 
+## ADR-026
+
+- Status: Accepted
+- Decision: Slice 5 stores Dynamic Exit Passes in `InMemoryExitPassRepository` with a 60-second default TTL from `EXIT_PASS_TTL_SECONDS`.
+- Rationale: It validates the secured exit workflow without adding a database migration before persistence is approved.
+- Consequences: Exit Passes are reset on Parking Service restart and must later move to `parking_schema.exit_passes` with protected token storage.
+
+## ADR-027
+
+- Status: Accepted
+- Decision: Creating a new Dynamic Exit Pass invalidates the previous active pass for the same session.
+- Rationale: A single currently valid customer credential is the simpler and safer MVP behavior.
+- Consequences: Staff reject invalidated passes; customers can regenerate a pass if the prior one expires.
+
+## ADR-028
+
+- Status: Accepted
+- Decision: Manual override in Slice 5 bypasses only Exit Pass possession, never payment; it requires an authorized staff/admin role, a nonblank reason, and a lightweight event record.
+- Rationale: Staff need a controlled lost-phone exception without creating an unpaid vehicle-exit path.
+- Consequences: Plate mismatches are retained as a suspicious reason when override is used; full audit/fraud storage remains later work.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

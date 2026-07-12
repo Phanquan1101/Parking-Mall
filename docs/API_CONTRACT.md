@@ -120,7 +120,17 @@ Check-in and check-out mutations accept `Idempotency-Key`.
 
 `GET /api/parking/sessions/{sessionId}` and `GET /api/parking/sessions?status=&plate=` require the same roles. Slice 2 storage is in-memory only.
 
-`POST /api/parking/sessions/{sessionId}/check-out` and manual override remain future canonical contract endpoints; they are intentionally not implemented in Slice 2.
+### Slice 5 implemented Exit Pass and check-out endpoints
+
+`POST /api/parking/sessions/{sessionId}/exit-passes` is public for the customer ticket flow but requires `lookupToken` in the JSON body. The token must belong to the specified session. The session must be `PAID` (or have zero final fee) and must not be `EXITED`. It returns an opaque Exit Pass token, expiry, 60-second default TTL, and `ACTIVE` status. Creating a new pass invalidates an older active pass for that session.
+
+`POST /api/parking/exit-passes/{exitPassToken}/validate` requires an `ADMIN` or `PARKING_STAFF` JWT and accepts `exitGate` and `exitPlate`. It validates but does not consume the pass. A matching normalized plate is required.
+
+`POST /api/parking/sessions/{sessionId}/check-out` requires `ADMIN` or `PARKING_STAFF` and accepts `exitPassToken`, `exitPlate`, and `exitGate`. It consumes the valid pass, records exit details, and changes the session to `EXITED`.
+
+`POST /api/parking/sessions/{sessionId}/manual-override` requires the same roles and accepts `reason`, `exitPlate`, and `exitGate`. It is only permitted after payment or zero fee; it records a lightweight override event and may record a suspicious plate-mismatch reason.
+
+Exit errors return a safe `errorCode`, including `EXIT_PASS_NOT_FOUND`, `EXIT_PASS_EXPIRED`, `EXIT_PASS_ALREADY_USED`, `SESSION_NOT_PAID`, `PLATE_MISMATCH`, and `SESSION_ALREADY_EXITED`. QR Lookup Token is never accepted as `exitPassToken`.
 
 ## 5. Public ticket and Exit Pass
 
@@ -141,6 +151,8 @@ Exit authorization requires all of the following:
 - exit plate matches, or an authorized manual override with reason is recorded.
 
 QR Lookup Token alone cannot call a check-out or gate-validation operation.
+
+The implemented public ticket response also includes `canGenerateExitPass`, `exitPassAvailable`, and `exitPassMessage`. It never includes an active Exit Pass token; the customer must explicitly generate one after payment.
 
 ## 6. Offline synchronization
 

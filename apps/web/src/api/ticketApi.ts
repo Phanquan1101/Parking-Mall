@@ -25,6 +25,9 @@ function isPublicTicket(value: unknown): value is PublicTicket {
     && typeof ticket.estimatedFee === "number"
     && typeof ticket.discountAmount === "number"
     && typeof ticket.finalFee === "number"
+    && typeof ticket.canGenerateExitPass === "boolean"
+    && typeof ticket.exitPassAvailable === "boolean"
+    && typeof ticket.exitPassMessage === "string"
     && typeof ticket.message === "string";
 }
 

@@ -44,4 +44,33 @@ public class ParkingGatewayController {
     public ResponseEntity<String> publicTicket(@PathVariable String lookupToken) {
         return parkingServiceProxy.publicTicket(lookupToken);
     }
+
+    @PostMapping("/api/parking/sessions/{sessionId}/exit-passes")
+    public ResponseEntity<String> generateExitPass(@PathVariable String sessionId, @RequestBody String requestBody) {
+        return parkingServiceProxy.generateExitPass(sessionId, requestBody);
+    }
+
+    @PostMapping("/api/parking/exit-passes/{exitPassToken}/validate")
+    public ResponseEntity<String> validateExitPass(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @PathVariable String exitPassToken,
+            @RequestBody String requestBody) {
+        return parkingServiceProxy.validateExitPass(authorization, exitPassToken, requestBody);
+    }
+
+    @PostMapping("/api/parking/sessions/{sessionId}/check-out")
+    public ResponseEntity<String> checkOut(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @PathVariable String sessionId,
+            @RequestBody String requestBody) {
+        return parkingServiceProxy.checkOut(authorization, sessionId, requestBody);
+    }
+
+    @PostMapping("/api/parking/sessions/{sessionId}/manual-override")
+    public ResponseEntity<String> manualOverride(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @PathVariable String sessionId,
+            @RequestBody String requestBody) {
+        return parkingServiceProxy.manualOverride(authorization, sessionId, requestBody);
+    }
 }

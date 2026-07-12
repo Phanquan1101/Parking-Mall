@@ -45,6 +45,30 @@ public class ParkingServiceProxy {
         return forward("/api/public/tickets/" + lookupToken, HttpMethod.GET, new HttpEntity<>(new HttpHeaders()));
     }
 
+    public ResponseEntity<String> generateExitPass(String sessionId, String requestBody) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return forward("/api/parking/sessions/" + sessionId + "/exit-passes", HttpMethod.POST, new HttpEntity<>(requestBody, headers));
+    }
+
+    public ResponseEntity<String> validateExitPass(String authorization, String exitPassToken, String requestBody) {
+        HttpHeaders headers = headersWithAuthorization(authorization);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return forward("/api/parking/exit-passes/" + exitPassToken + "/validate", HttpMethod.POST, new HttpEntity<>(requestBody, headers));
+    }
+
+    public ResponseEntity<String> checkOut(String authorization, String sessionId, String requestBody) {
+        HttpHeaders headers = headersWithAuthorization(authorization);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return forward("/api/parking/sessions/" + sessionId + "/check-out", HttpMethod.POST, new HttpEntity<>(requestBody, headers));
+    }
+
+    public ResponseEntity<String> manualOverride(String authorization, String sessionId, String requestBody) {
+        HttpHeaders headers = headersWithAuthorization(authorization);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return forward("/api/parking/sessions/" + sessionId + "/manual-override", HttpMethod.POST, new HttpEntity<>(requestBody, headers));
+    }
+
     private HttpHeaders headersWithAuthorization(String authorization) {
         HttpHeaders headers = new HttpHeaders();
         if (authorization != null) {

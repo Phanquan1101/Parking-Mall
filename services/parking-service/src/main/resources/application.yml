@@ -15,3 +15,4 @@ app:
   public-ticket-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}
   internal-service-token: ${INTERNAL_SERVICE_TOKEN:parkflow-local-internal-token-change-me}
   demo-flat-fee: ${PARKING_DEMO_FLAT_FEE:5000}
+  exit-pass-ttl-seconds: ${EXIT_PASS_TTL_SECONDS:60}

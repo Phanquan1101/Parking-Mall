@@ -47,4 +47,26 @@ class ParkingGatewayControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"sessionCode\":\"PF-20260711-000001\"}"));
     }
+
+    @Test
+    void exitPassRoutesForwardPublicAndProtectedRequests() throws Exception {
+        when(parkingServiceProxy.generateExitPass(anyString(), anyString()))
+                .thenReturn(ResponseEntity.status(201).contentType(MediaType.APPLICATION_JSON).body("{\"status\":\"ACTIVE\"}"));
+        when(parkingServiceProxy.validateExitPass(anyString(), anyString(), anyString()))
+                .thenReturn(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body("{\"valid\":true}"));
+        when(parkingServiceProxy.checkOut(anyString(), anyString(), anyString()))
+                .thenReturn(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body("{\"status\":\"EXITED\"}"));
+
+        mockMvc.perform(post("/api/parking/sessions/session-1/exit-passes")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"lookupToken\":\"ticket\"}"))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/parking/exit-passes/pass-1/validate")
+                        .header("Authorization", "Bearer staff-token").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"exitGate\":\"GATE_OUT_01\",\"exitPlate\":\"59A1-12345\"}"))
+                .andExpect(status().isOk()).andExpect(content().json("{\"valid\":true}"));
+        mockMvc.perform(post("/api/parking/sessions/session-1/check-out")
+                        .header("Authorization", "Bearer staff-token").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"exitPassToken\":\"pass-1\",\"exitGate\":\"GATE_OUT_01\",\"exitPlate\":\"59A1-12345\"}"))
+                .andExpect(status().isOk()).andExpect(content().json("{\"status\":\"EXITED\"}"));
+    }
 }

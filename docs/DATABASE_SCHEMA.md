@@ -43,9 +43,11 @@ The raw lookup token is not stored when hashing is feasible.
 
 ### exit_passes
 
-`id` PK, `session_id` FK parking_sessions, `token_hash`, `status`, `issued_at`, `expires_at`, `used_at`, `used_by`.
+`id` PK, `session_id` FK parking_sessions, `token_hash`, `status`, `created_at`, `expires_at`, `used_at`, `invalidated_at`, `created_from`, `ttl_seconds`, `used_by`.
 
-Exit Pass statuses: `ACTIVE`, `USED`, `EXPIRED`, `REVOKED`.
+Exit Pass statuses: `ACTIVE`, `USED`, `EXPIRED`, `INVALIDATED`.
+
+Slice 5 uses an in-memory repository only; this remains the persistence contract for a later migration. An active pass is invalidated when a replacement pass is created for the same session.
 
 ### vehicles
 

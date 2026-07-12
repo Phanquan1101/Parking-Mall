@@ -57,11 +57,11 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-0501 | Draft Exit Pass schema | P0 | TTL, one-time status, and session binding documented | TODO |
-| T-0502 | Draft Exit Pass creation/validation | P0 | Valid only for paid or zero-fee session | TODO |
-| T-0503 | Draft check-out contract | P0 | Plate match, grace period, and pass validation required | TODO |
-| T-0504 | Draft manual override contract | P0 | Authorized role, reason, and audit log required | TODO |
-| T-0505 | Add suspicious/fraud acceptance criteria | P0 | Plate mismatch and pass replay remain visible | TODO |
+| T-0501 | Implement Exit Pass schema | P0 | In-memory TTL, one-time status, session binding, and documentation exist | DONE |
+| T-0502 | Implement Exit Pass creation/validation | P0 | Valid only for paid or zero-fee session; replacement invalidates active pass | DONE |
+| T-0503 | Implement check-out contract | P0 | Plate match and valid unexpired/unused pass are required | DONE |
+| T-0504 | Implement manual override contract | P0 | Authorized role, paid/zero-fee session, reason, and lightweight audit event required | DONE |
+| T-0505 | Add suspicious/fraud acceptance criteria | P0 | Plate mismatch and pass replay are rejected and lightweight events are recorded | DONE |
 
 ## Slice 6 - Offline Staff Mode
 
