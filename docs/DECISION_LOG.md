@@ -232,6 +232,13 @@ All decisions below are accepted and form the documentation source of truth for 
 - Decision: Use temporary `AGGREGATE_INVOICE` threshold `300000` and discount `5000`, capped at estimated parking fee.
 - Rationale: It demonstrates aggregation while deferring real merchant rules and accounting.
 
+## ADR-034
+
+- Status: Accepted
+- Decision: Slice 8 uses in-memory, manually ADMIN-triggered payment reconciliation.
+- Rationale: It proves pending/failed Parking-update recovery before external provider integration.
+- Consequences: Reconciliation retries only protected internal Parking payment updates and never refunds, checks out vehicles, creates Exit Passes, or uses SePay.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

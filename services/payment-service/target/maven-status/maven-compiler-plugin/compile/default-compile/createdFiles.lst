@@ -1,3 +1,4 @@
+com\parkflow\mall\payment\model\ParkingUpdateStatus.class
 com\parkflow\mall\payment\service\PaymentService.class
 com\parkflow\mall\payment\model\PaymentTargetType.class
 com\parkflow\mall\payment\dto\PaymentDtos$CreateOrderRequest.class
@@ -11,6 +12,7 @@ com\parkflow\mall\payment\controller\PaymentController.class
 com\parkflow\mall\payment\dto\PaymentDtos$SimulateRequest.class
 com\parkflow\mall\payment\dto\PaymentDtos$SimulationResponse.class
 com\parkflow\mall\payment\model\PaymentOrder.class
+com\parkflow\mall\payment\model\PaymentReconciliationItem.class
 com\parkflow\mall\payment\repository\InMemoryIdempotencyStore.class
 com\parkflow\mall\payment\config\PaymentConfig.class
 com\parkflow\mall\payment\service\PaymentService$Ticket.class

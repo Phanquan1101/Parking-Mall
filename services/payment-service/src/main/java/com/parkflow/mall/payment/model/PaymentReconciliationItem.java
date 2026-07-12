@@ -1,0 +1,1 @@
+package com.parkflow.mall.payment.model; import java.time.Instant; public record PaymentReconciliationItem(String id,String paymentOrderId,String targetId,String issueType,String status,String message,Instant createdAt,Instant updatedAt,int attemptCount) {}

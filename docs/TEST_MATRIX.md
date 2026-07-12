@@ -130,6 +130,19 @@ Every vertical slice must include:
 | TC-S7-MER-003 | Aggregate threshold | `300000` aggregate applies `5000` discount capped at fee | Automated |
 | TC-S7-PARK-001 | Internal merchant discount update | Updates public ticket invoice total, discount, and final fee | Automated |
 
+### Slice 8 reconciliation coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-S8-PAY-001 | ADMIN reconciliation run | Admin may run reconciliation; invalid/non-admin JWT is denied | Automated |
+| TC-S8-PAY-002 | Expired pending order | Order becomes `EXPIRED` and item is recorded | Automated |
+| TC-S8-PAY-003 | Mismatched order | Visible as `PENDING_MANUAL_REVIEW`; Parking is not updated | Automated |
+| TC-S8-PAY-004 | Failed Parking update retry | Retry resolves item or leaves it visible/open | Automated service coverage pending expansion |
+| TC-S8-PAY-005 | Retry/open/resolved lifecycle | Failed protected Parking update creates one OPEN item; retry resolves or leaves it OPEN | Automated |
+| TC-S8-PAY-006 | Reconciliation item list/get | Multiple items remain distinct and detail retrieval is safe | Automated |
+| TC-S8-PAY-007 | Reconciliation safety | Retry invokes only protected Parking payment update; no Exit Pass, checkout, refund, or merchant update | Automated by service interaction scope |
+| TC-S8-GATE-001 | Reconciliation Gateway routes | Run/list/detail routes forward Authorization, Idempotency-Key, filters, and do not expose internal Parking routes | Automated |
+
 ## 5. Payment tests
 
 | Test ID | Scenario | Expected Result | Priority |

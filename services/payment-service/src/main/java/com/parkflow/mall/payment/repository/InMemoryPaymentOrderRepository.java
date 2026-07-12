@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
  public PaymentOrder save(PaymentOrder o){orders.put(o.id(),o);if(o.creationIdempotencyKey()!=null)creationKeys.putIfAbsent(o.creationIdempotencyKey(),o.id());return o;}
  public Optional<PaymentOrder> findById(String id){return Optional.ofNullable(orders.get(id));}
  public Optional<PaymentOrder> findByCreationKey(String key){return Optional.ofNullable(creationKeys.get(key)).flatMap(this::findById);}
+ public java.util.List<PaymentOrder> findAll(){return java.util.List.copyOf(orders.values());}
 }

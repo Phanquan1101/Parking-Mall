@@ -187,6 +187,12 @@ Payment simulation, webhook, reconciliation, and order creation where retryable 
 
 `POST /internal/parking/sessions/{sessionId}/payment-status` is Parking-Service-internal only, requires `X-Internal-Service-Token`, and is intentionally not routed by API Gateway. It accepts only `PAID` updates and never creates an Exit Pass.
 
+### Slice 8 implemented reconciliation
+
+`POST /api/payments/reconciliation/run`, `GET /api/payments/reconciliation/items`, and `GET /api/payments/reconciliation/items/{itemId}` require an `ADMIN` JWT. The run expires overdue `PENDING` orders, exposes `MISMATCHED` orders as `PENDING_MANUAL_REVIEW`, and retries PAID orders whose protected Parking update is pending reconciliation.
+
+Item issue types include `PENDING_EXPIRED`, `PARKING_UPDATE_FAILED`, and `PAYMENT_MISMATCHED`; statuses include `OPEN`, `RESOLVED`, and `PENDING_MANUAL_REVIEW`. Reconciliation never generates Exit Passes, checks out vehicles, changes merchant discounts, refunds, or invokes SePay.
+
 ## 8. Merchant validation
 
 | Method | Path | Role | Purpose |

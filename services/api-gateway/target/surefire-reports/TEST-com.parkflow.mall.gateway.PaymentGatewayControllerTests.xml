@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.parkflow.mall.gateway.MerchantGatewayControllerTests" time="0.956" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.parkflow.mall.gateway.PaymentGatewayControllerTests" time="0.661" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -64,9 +64,9 @@
     <property name="java.class.version" value="65.0"/>
     <property name="LOGGED_APPLICATION_NAME" value="[api-gateway] "/>
   </properties>
-  <testcase name="merchantRoutesExistAndForwardAuthorization" classname="com.parkflow.mall.gateway.MerchantGatewayControllerTests" time="0.166">
-    <system-out><![CDATA[2026-07-12T11:17:26.481+07:00  INFO 16416 --- [api-gateway] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.parkflow.mall.gateway.MerchantGatewayControllerTests]: MerchantGatewayControllerTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2026-07-12T11:17:26.504+07:00  INFO 16416 --- [api-gateway] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.parkflow.mall.gateway.ApiGatewayApplication for test class com.parkflow.mall.gateway.MerchantGatewayControllerTests
+  <testcase name="reconciliationRoutesForwardHeadersAndFiltersAndInternalRoutesStayHidden" classname="com.parkflow.mall.gateway.PaymentGatewayControllerTests" time="0.079">
+    <system-out><![CDATA[2026-07-12T11:17:28.681+07:00  INFO 16416 --- [api-gateway] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.parkflow.mall.gateway.PaymentGatewayControllerTests]: PaymentGatewayControllerTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-07-12T11:17:28.708+07:00  INFO 16416 --- [api-gateway] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.parkflow.mall.gateway.ApiGatewayApplication for test class com.parkflow.mall.gateway.PaymentGatewayControllerTests
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -77,12 +77,12 @@
 
  :: Spring Boot ::                (v3.4.2)
 
-2026-07-12T11:17:26.569+07:00  INFO 16416 --- [api-gateway] [           main] c.p.m.g.MerchantGatewayControllerTests   : Starting MerchantGatewayControllerTests using Java 21.0.8 with PID 16416 (started by PHAN DOAN THE QUAN in E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\api-gateway)
-2026-07-12T11:17:26.569+07:00  INFO 16416 --- [api-gateway] [           main] c.p.m.g.MerchantGatewayControllerTests   : No active profile set, falling back to 1 default profile: "default"
-2026-07-12T11:17:27.166+07:00  INFO 16416 --- [api-gateway] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
-2026-07-12T11:17:27.167+07:00  INFO 16416 --- [api-gateway] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
-2026-07-12T11:17:27.170+07:00  INFO 16416 --- [api-gateway] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
-2026-07-12T11:17:27.235+07:00  INFO 16416 --- [api-gateway] [           main] c.p.m.g.MerchantGatewayControllerTests   : Started MerchantGatewayControllerTests in 0.721 seconds (process running for 13.809)
+2026-07-12T11:17:28.817+07:00  INFO 16416 --- [api-gateway] [           main] c.p.m.g.PaymentGatewayControllerTests    : Starting PaymentGatewayControllerTests using Java 21.0.8 with PID 16416 (started by PHAN DOAN THE QUAN in E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\api-gateway)
+2026-07-12T11:17:28.818+07:00  INFO 16416 --- [api-gateway] [           main] c.p.m.g.PaymentGatewayControllerTests    : No active profile set, falling back to 1 default profile: "default"
+2026-07-12T11:17:29.216+07:00  INFO 16416 --- [api-gateway] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-07-12T11:17:29.217+07:00  INFO 16416 --- [api-gateway] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-12T11:17:29.221+07:00  INFO 16416 --- [api-gateway] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 3 ms
+2026-07-12T11:17:29.239+07:00  INFO 16416 --- [api-gateway] [           main] c.p.m.g.PaymentGatewayControllerTests    : Started PaymentGatewayControllerTests in 0.515 seconds (process running for 15.814)
 ]]></system-out>
   </testcase>
 </testsuite>

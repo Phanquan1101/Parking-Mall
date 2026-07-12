@@ -9,6 +9,7 @@ management:
       exposure:
         include: health,info
 app:
+  jwt-secret: ${JWT_SECRET:parkflow-local-development-secret-change-me-2026}
   payment-mode: ${PAYMENT_MODE:SIMULATION}
   order-ttl-minutes: ${PAYMENT_ORDER_TTL_MINUTES:15}
   parking-base-url: ${PARKING_SERVICE_BASE_URL:http://localhost:8082}

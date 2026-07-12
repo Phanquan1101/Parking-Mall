@@ -88,11 +88,11 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-0801 | Draft reconciliation job schema | P0 | Jobs and items track pending/mismatched orders | TODO |
-| T-0802 | Draft reconciliation endpoint | P0 | `/api/payments/reconciliation/run` is documented | TODO |
-| T-0803 | Reconcile webhook/simulation retries | P0 | Duplicate events do not double-pay | TODO |
-| T-0804 | Reconcile parking/reservation state | P0 | Inconsistent state becomes resolved or manual review | TODO |
-| T-0805 | Add reconciliation dashboard/audit criteria | P0 | Pending and mismatched states remain visible and logged | TODO |
+| T-0801 | Implement reconciliation records | P0 | In-memory items track pending/mismatched orders | DONE |
+| T-0802 | Implement reconciliation endpoint | P0 | ADMIN run/list/get endpoints exist | DONE |
+| T-0803 | Reconcile simulation retries | P0 | Failed Parking update can retry without double-pay | DONE |
+| T-0804 | Reconcile Parking state | P0 | Update becomes resolved or remains visible for review | DONE |
+| T-0805 | Add reconciliation visibility | P0 | API exposes pending/manual-review items | DONE |
 
 ## Slice 9 - Reservation Basic
 
