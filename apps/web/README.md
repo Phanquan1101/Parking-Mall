@@ -1,10 +1,10 @@
 # ParkFlow Mall Web
 
-Current status: React + Vite + TypeScript skeleton only.
+Current status: Slice 3 customer ticket page is implemented with React, Vite, TypeScript, and React Router.
 
-The placeholder identifies future Staff Console, Customer Ticket, Merchant Dashboard, and Admin Dashboard surfaces. It has no API calls, login, QR scanning, or business behavior.
+`/tickets/:lookupToken` calls the public ticket API and displays only its safe customer fields. It does not include login, payment, or exit authorization.
 
-Business UI starts: Slice 3 - Customer Ticket Page, with staff/admin surfaces following their respective slices.
+The home route (`/`) explains the ticket-link format. Staff, merchant, and admin surfaces remain future work.
 
 Run locally:
 
@@ -12,3 +12,5 @@ Run locally:
 npm install
 npm run dev
 ```
+
+The default API gateway is `http://localhost:8080`. Copy `.env.example` to `.env` to override `VITE_API_BASE_URL` for local development.

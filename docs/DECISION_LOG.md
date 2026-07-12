@@ -142,6 +142,13 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: This avoids an Identity Service round-trip for each protected parking request while a shared auth package does not yet exist.
 - Consequences: Identity and Parking Service must use compatible signing configuration; Gateway forwards the bearer token without validating it.
 
+## ADR-021
+
+- Status: Accepted
+- Decision: Slice 3 uses `react-router-dom` for public ticket routing and `VITE_API_BASE_URL` for the frontend gateway base URL.
+- Rationale: A parameterized browser route keeps QR ticket links shareable while the environment variable supports local gateway configuration without embedding deployment URLs in frontend code.
+- Consequences: `/tickets/:lookupToken` is public, fetches only the public ticket endpoint, and must never surface lookup-token metadata or exit authorization controls.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

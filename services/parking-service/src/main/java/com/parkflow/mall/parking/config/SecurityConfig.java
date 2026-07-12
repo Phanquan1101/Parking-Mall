@@ -19,7 +19,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/actuator/health", "/actuator/info", "/api/public/tickets/**").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/info", "/error", "/api/public/tickets/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/parking/sessions/check-in").hasAnyRole("ADMIN", "PARKING_STAFF")
                         .requestMatchers(HttpMethod.GET, "/api/parking/sessions/**").hasAnyRole("ADMIN", "PARKING_STAFF")
                         .anyRequest().authenticated())

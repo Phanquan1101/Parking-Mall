@@ -1,18 +1,370 @@
 :root {
-  font-family: system-ui, sans-serif;
-  color: #1f2937;
-  background: #f8fafc;
+  color: oklch(0.26 0.025 250);
+  background: oklch(1 0 0);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --bg: oklch(1 0 0);
+  --surface: oklch(0.974 0.008 250);
+  --surface-strong: oklch(0.948 0.014 250);
+  --ink: oklch(0.26 0.025 250);
+  --muted: oklch(0.48 0.025 250);
+  --line: oklch(0.87 0.012 250);
+  --primary: oklch(0.59 0.15 79);
+  --accent: oklch(0.38 0.08 195);
+  --warning-bg: oklch(0.955 0.035 82);
+  --warning-ink: oklch(0.31 0.07 70);
+  --danger: oklch(0.49 0.18 27);
+  --success: oklch(0.42 0.11 151);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
+  min-width: 20rem;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+}
+
+button,
+a {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid oklch(0.73 0.12 79 / 0.65);
+  outline-offset: 3px;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(100% - 2rem, 68rem);
+  min-height: 4.5rem;
+  margin: 0 auto;
+  gap: 1rem;
+}
+
+.brand {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 760;
+  letter-spacing: -0.015em;
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: inline-grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-right: 0.45rem;
+  place-items: center;
+  border-radius: 0.35rem;
+  background: var(--primary);
+  color: var(--bg);
+  font-size: 0.76rem;
+  vertical-align: -0.12rem;
+}
+
+.header-label {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.ticket-layout,
+.home-layout {
+  width: min(100% - 2rem, 50rem);
+  margin: 0 auto;
+  padding: 3.5rem 0 4.5rem;
+}
+
+.ticket-intro {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 2rem;
+}
+
+.ticket-intro p,
+.home-layout p,
+.state-panel p {
+  max-width: 65ch;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+h1,
+h2 {
+  margin: 0;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 1.12;
+}
+
+h2 {
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+
+.ticket-code {
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.ticket-sheet {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--bg);
+}
+
+.ticket-section {
+  padding: 1.5rem;
+}
+
+.ticket-section + .ticket-section {
+  border-top: 1px solid var(--line);
+}
+
+.section-heading {
+  margin-bottom: 1.25rem;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem 1.5rem;
   margin: 0;
 }
 
-main {
-  max-width: 46rem;
-  margin: 4rem auto;
-  padding: 2rem;
-  background: white;
+.details-grid > div {
+  min-width: 0;
+}
+
+.details-grid dt {
+  margin-bottom: 0.35rem;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.details-grid dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+.status--paid,
+.status--active {
+  background: oklch(0.94 0.045 151);
+  color: var(--success);
+}
+
+.fee-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.fee-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.8rem 0;
+  color: var(--muted);
+}
+
+.fee-list > div + div {
+  border-top: 1px solid var(--line);
+}
+
+.fee-list dt,
+.fee-list dd {
+  margin: 0;
+}
+
+.fee-list dd {
+  color: var(--ink);
+  font-weight: 700;
+  text-align: right;
+}
+
+.fee-list .fee-total {
+  padding-bottom: 0;
+  color: var(--ink);
+  font-size: 1.08rem;
+  font-weight: 760;
+}
+
+.security-notice {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid oklch(0.83 0.08 82);
+  border-radius: 0.65rem;
+  background: var(--warning-bg);
+}
+
+.security-notice h2 {
+  margin-bottom: 0.4rem;
+  color: var(--warning-ink);
+  font-size: 1rem;
+}
+
+.security-notice p {
+  margin: 0;
+  color: var(--warning-ink);
+  line-height: 1.55;
+}
+
+.state-panel {
+  display: grid;
+  gap: 0.8rem;
+  padding: 2rem 0;
+}
+
+.state-panel--error h1 {
+  color: var(--danger);
+}
+
+.primary-button {
+  width: fit-content;
+  min-height: 2.75rem;
+  margin-top: 0.45rem;
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: var(--bg);
+  font-weight: 750;
+  transition: background-color 180ms ease-out, transform 180ms ease-out;
+}
+
+.primary-button:hover {
+  background: oklch(0.52 0.15 79);
+}
+
+.primary-button:active {
+  transform: translateY(1px);
+}
+
+.skeleton-sheet {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
   border-radius: 0.75rem;
-  box-shadow: 0 8px 24px rgb(15 23 42 / 0.08);
+}
+
+.skeleton-line {
+  height: 0.9rem;
+  border-radius: 0.25rem;
+  background: var(--surface-strong);
+}
+
+.skeleton-line--short {
+  width: 43%;
+}
+
+.skeleton-line--medium {
+  width: 67%;
+}
+
+.home-layout {
+  display: grid;
+  gap: 1.35rem;
+  padding-top: 5rem;
+}
+
+.home-layout h1 {
+  max-width: 20ch;
+  font-size: 2.5rem;
+}
+
+.route-hint {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+code {
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88em;
+}
+
+@media (max-width: 38rem) {
+  .header-content,
+  .ticket-layout,
+  .home-layout {
+    width: min(100% - 1.5rem, 50rem);
+  }
+
+  .ticket-layout,
+  .home-layout {
+    padding-top: 2.25rem;
+  }
+
+  .ticket-section {
+    padding: 1.25rem;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .header-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

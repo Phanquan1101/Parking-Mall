@@ -1,20 +1,13 @@
-const placeholders = [
-  "Staff Console placeholder",
-  "Customer Ticket placeholder",
-  "Merchant Dashboard placeholder",
-  "Admin Dashboard placeholder",
-];
+import { Navigate, Route, Routes } from "react-router-dom";
+import { CustomerTicketPage } from "./pages/CustomerTicketPage";
+import { HomePage } from "./pages/HomePage";
 
 export default function App() {
   return (
-    <main>
-      <h1>ParkFlow Mall</h1>
-      <p>Slice 0 frontend foundation. No API calls, login, or QR scanning are implemented.</p>
-      <ul>
-        {placeholders.map((placeholder) => (
-          <li key={placeholder}>{placeholder}</li>
-        ))}
-      </ul>
-    </main>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/tickets/:lookupToken?" element={<CustomerTicketPage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

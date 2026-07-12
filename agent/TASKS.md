@@ -39,9 +39,9 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-0301 | Draft customer ticket page contract | P0 | Session summary, fee estimate, and payment state are specified | TODO |
-| T-0302 | Document mobile-safe customer data | P0 | Plate is masked and no exit authorization is exposed | TODO |
-| T-0303 | Document ticket error states | P0 | Invalid/expired lookup token gives actionable response | TODO |
+| T-0301 | Implement customer ticket page contract | P0 | Session summary, fee estimate, and payment state render from the public endpoint | DONE |
+| T-0302 | Implement mobile-safe customer data | P0 | Only public ticket fields render; no staff, token metadata, or exit authorization is exposed | DONE |
+| T-0303 | Implement ticket error states | P0 | Empty/invalid token and generic retrieval failures show safe actionable states | DONE |
 
 ## Slice 4 - Payment Simulation
 

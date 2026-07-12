@@ -4,9 +4,9 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
-Slice 2 - Parking Session + QR Lookup is complete. Parking Staff and Admin can create in-memory ACTIVE sessions, receive opaque lookup tokens, and expose public ticket lookup. Payment, exit authorization, and all later parking features remain unimplemented.
+Slice 3 - Customer Ticket Page is complete. Customers can open a public QR Lookup link to view a safe parking-session and fee summary without logging in. Payment, exit authorization, and all later parking features remain unimplemented.
 
-Next slice: Slice 3 - Customer Ticket Page.
+Next slice: Slice 4 - Payment Simulation.
 
 ## Tech stack
 
@@ -19,7 +19,7 @@ Next slice: Slice 3 - Customer Ticket Page.
 ## Repository structure
 
 ```text
-apps/web/                     React + Vite placeholder
+apps/web/                     React + Vite customer ticket page
 services/api-gateway/         Spring Boot gateway skeleton
 services/identity-service/    Spring Boot identity skeleton
 services/parking-service/     Spring Boot parking skeleton
@@ -91,13 +91,29 @@ curl.exe "http://localhost:8080/api/public/tickets/<qrLookupToken>"
 
 Parking sessions are in-memory only for Slice 2 and disappear when Parking Service restarts.
 
-Run the web placeholder:
+Run the customer ticket page:
 
 ```powershell
 cd apps/web
 npm install
 npm run dev
 ```
+
+The frontend calls `http://localhost:8080` by default. To use another gateway URL, copy `apps/web/.env.example` to `apps/web/.env` and set `VITE_API_BASE_URL`.
+
+Open a returned lookup token in the customer ticket page:
+
+```text
+http://localhost:5173/tickets/<qrLookupToken>
+```
+
+Manual Slice 3 demo flow:
+
+1. Start Identity Service, Parking Service, API Gateway, and the web app.
+2. Log in as `staff` and create a parking session through the gateway.
+3. Copy `qrLookupToken` from the check-in response.
+4. Open `http://localhost:5173/tickets/<qrLookupToken>`.
+5. Confirm the summary renders and an invalid token shows the safe not-found message.
 
 Run the vision placeholder:
 

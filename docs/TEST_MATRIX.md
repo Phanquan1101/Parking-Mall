@@ -66,6 +66,18 @@ Every vertical slice must include:
 | TC-S2-PARK-009 | Merchant role check-in attempt | `403 Forbidden` | Implemented |
 | TC-S2-PARK-010 | Check-out route guard | No check-out endpoint exists in Slice 2 | Implemented |
 
+### Slice 3 implemented coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-S3-WEB-001 | Customer opens a valid lookup URL | Public ticket summary renders without login | Implemented |
+| TC-S3-WEB-002 | Customer opens an invalid lookup URL | Safe `Ticket not found or no longer valid.` state renders | Implemented |
+| TC-S3-WEB-003 | Public ticket request is pending | `Loading ticket...` state is visible | Implemented |
+| TC-S3-WEB-004 | Public ticket request fails outside `404` | Retryable generic error state is visible | Implemented |
+| TC-S3-WEB-005 | Customer ticket summary renders | Vehicle, parking, fee, and status fields render from the public contract | Implemented |
+| TC-S3-WEB-006 | Customer views ticket security notice | UI states that QR Lookup cannot authorize vehicle exit | Implemented |
+| TC-S3-WEB-007 | Customer ticket page data exposure | No `staffId`, raw lookup token, audit data, or security internals are rendered | Implemented |
+
 ## 5. Payment tests
 
 | Test ID | Scenario | Expected Result | Priority |
