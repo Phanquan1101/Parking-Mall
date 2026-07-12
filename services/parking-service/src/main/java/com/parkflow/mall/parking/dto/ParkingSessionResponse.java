@@ -19,5 +19,8 @@ public record ParkingSessionResponse(
         String reservationId,
         String reservationCode,
         boolean createdFromReservation,
+        String ocrRequestId,
+        String ocrCandidatePlate,
+        Double ocrConfidence,
         String ticketUrl) {
 }

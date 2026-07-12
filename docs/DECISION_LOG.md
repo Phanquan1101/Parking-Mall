@@ -246,6 +246,13 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: It demonstrates a safe basic reservation/check-in lifecycle without database migrations, payments, deposits, or physical slot assignment.
 - Consequences: `RESERVED`, `CANCELLED`, `EXPIRED`, and `CONSUMED` are supported. A consumed reservation creates no payment state and does not bypass ordinary Parking payment, merchant, Exit Pass, or checkout rules.
 
+## ADR-036
+
+- Status: Accepted
+- Decision: Slice 10 uses a deterministic filename-based `DEMO_OCR` provider. Vision accepts an image only for the request lifetime and returns a candidate with confidence and mandatory staff-confirmation warning.
+- Rationale: This validates OCR-assist integration without GPU dependencies, paid providers, permanent image storage, camera streaming, or hardware integration.
+- Consequences: The confirmed staff plate remains authoritative. OCR can never auto-create a session, bypass reservation/duplicate validation, or alter payment, merchant, Exit Pass, checkout, offline, or reconciliation behavior.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

@@ -1,6 +1,7 @@
-com\parkflow\mall\gateway\ParkingGatewayControllerTests.class
 com\parkflow\mall\gateway\ReservationGatewayControllerTests.class
 com\parkflow\mall\gateway\MerchantGatewayControllerTests.class
-com\parkflow\mall\gateway\PaymentGatewayControllerTests.class
+com\parkflow\mall\gateway\VisionGatewayControllerTests.class
 com\parkflow\mall\gateway\AuthGatewayControllerTests.class
 com\parkflow\mall\gateway\ApiGatewayApplicationTests.class
+com\parkflow\mall\gateway\ParkingGatewayControllerTests.class
+com\parkflow\mall\gateway\PaymentGatewayControllerTests.class

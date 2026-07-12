@@ -84,6 +84,16 @@ services:
     ports:
       - "${FULLSTACK_RESERVATION_HOST_PORT:-18085}:8085"
 
+  vision-service:
+    build:
+      context: ./services/vision-service
+    profiles: [full-stack]
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-parkflow-local-development-secret-change-me-2026}
+      OCR_LOW_CONFIDENCE_THRESHOLD: ${OCR_LOW_CONFIDENCE_THRESHOLD:-0.75}
+    ports:
+      - "${FULLSTACK_VISION_HOST_PORT:-18090}:8090"
+
   api-gateway:
     build:
       context: ./services/api-gateway
@@ -101,6 +111,8 @@ services:
         condition: service_started
       reservation-service:
         condition: service_started
+      vision-service:
+        condition: service_started
     environment:
       API_GATEWAY_PORT: 8080
       IDENTITY_SERVICE_BASE_URL: http://identity-service:8081
@@ -108,6 +120,7 @@ services:
       PAYMENT_SERVICE_BASE_URL: http://payment-service:8083
       MERCHANT_SERVICE_BASE_URL: http://merchant-service:8084
       RESERVATION_SERVICE_BASE_URL: http://reservation-service:8085
+      VISION_SERVICE_BASE_URL: http://vision-service:8090
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
     ports:
       - "${FULLSTACK_API_GATEWAY_HOST_PORT:-18080}:8080"

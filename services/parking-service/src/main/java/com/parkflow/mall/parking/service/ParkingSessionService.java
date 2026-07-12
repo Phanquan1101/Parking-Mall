@@ -106,8 +106,11 @@ public class ParkingSessionService {
         if (request.vehicleType() == null || request.entryGate() == null || request.entryGate().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "vehicleType and entryGate are required");
         }
-        if (request.plateSource() != PlateSource.MANUAL) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Slice 2 requires MANUAL plateSource");
+        if (request.plateSource() != PlateSource.MANUAL && request.plateSource() != PlateSource.OCR_ASSISTED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "plateSource must be MANUAL or OCR_ASSISTED");
+        }
+        if (request.ocrConfidence() != null && (request.ocrConfidence() < 0 || request.ocrConfidence() > 1)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ocrConfidence must be between 0 and 1");
         }
         String normalizedPlate = normalizePlate(request.vehiclePlate());
         if (normalizedPlate.isBlank()) {
@@ -126,8 +129,8 @@ public class ParkingSessionService {
         ParkingSession session = new ParkingSession(
                 sessionId, nextSessionCode(now), normalizedPlate, normalizedPlate,
                 request.vehicleType(), ParkingSessionStatus.ACTIVE, PaymentStatus.UNPAID, now,
-                request.entryGate().trim(), actor.id(), PlateSource.MANUAL, nextToken(), null, null, null,
-                null, null, null, false, null, null, null, reservationId, request.reservationCode(), now, now);
+                request.entryGate().trim(), actor.id(), request.plateSource(), nextToken(), null, null, null,
+                null, null, null, false, null, null, null, reservationId, request.reservationCode(), request.ocrRequestId(), request.ocrCandidatePlate(), request.ocrConfidence(), now, now);
         if (!repository.saveIfNoActive(session)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "An ACTIVE session already exists for this vehicle plate");
         }
@@ -266,7 +269,7 @@ public class ParkingSessionService {
                 session.vehicleType(), ParkingSessionStatus.PAID, PaymentStatus.PAID, session.entryTime(), session.entryGate(), session.staffId(),
                 session.plateSource(), session.qrLookupToken(), request.paymentOrderId(), request.amountPaid(), request.paidAt(),
                 session.exitTime(), session.exitGate(), session.exitPlate(), session.manualOverride(), session.manualOverrideReason(),
-                session.suspiciousReason(), session.lastExitPassId(), session.reservationId(), session.reservationCode(), session.createdAt(), now));
+                session.suspiciousReason(), session.lastExitPassId(), session.reservationId(), session.reservationCode(), session.ocrRequestId(), session.ocrCandidatePlate(), session.ocrConfidence(), session.createdAt(), now));
         eventRecorder.record(new ParkingSessionEvent("PAYMENT_CONFIRMED", sessionId, "payment-service", now));
         return new InternalPaymentUpdateResponse(sessionId, PaymentStatus.PAID, request.amountPaid(), true);
     }
@@ -356,7 +359,7 @@ public class ParkingSessionService {
         Instant now = Instant.now();
         ParkingSession session = new ParkingSession(UUID.randomUUID().toString(), nextSessionCode(now), normalizedPlate, normalizedPlate,
                 vehicleType, ParkingSessionStatus.ACTIVE, PaymentStatus.UNPAID, now, payload.entryGate().trim(), actor.id(), PlateSource.MANUAL,
-                nextToken(), null, null, null, null, null, null, false, null, null, null, null, null, now, now);
+                nextToken(), null, null, null, null, null, null, false, null, null, null, null, null, null, null, null, now, now);
         if (!repository.saveIfNoActive(session)) {
             return persistOfflineResult(request, deviceId, syncRequestKey, actor, payload, OfflineSyncStatus.CONFLICT, null, null,
                     "Offline check-in conflicts with an active server session.", "ACTIVE_SESSION_FOR_NORMALIZED_PLATE");
@@ -424,7 +427,7 @@ public class ParkingSessionService {
         return new ParkingSession(session.id(), session.sessionCode(), session.vehiclePlate(), session.normalizedPlate(), session.vehicleType(),
                 session.status(), session.paymentStatus(), session.entryTime(), session.entryGate(), session.staffId(), session.plateSource(),
                 session.qrLookupToken(), session.paymentOrderId(), session.amountPaid(), session.paidAt(), session.exitTime(), session.exitGate(),
-                session.exitPlate(), session.manualOverride(), session.manualOverrideReason(), session.suspiciousReason(), passId, session.reservationId(), session.reservationCode(), session.createdAt(), now);
+                session.exitPlate(), session.manualOverride(), session.manualOverrideReason(), session.suspiciousReason(), passId, session.reservationId(), session.reservationCode(), session.ocrRequestId(), session.ocrCandidatePlate(), session.ocrConfidence(), session.createdAt(), now);
     }
 
     private ParkingSession copyExited(ParkingSession session, String exitGate, String exitPlate, boolean manualOverride,
@@ -432,7 +435,7 @@ public class ParkingSessionService {
         return new ParkingSession(session.id(), session.sessionCode(), session.vehiclePlate(), session.normalizedPlate(), session.vehicleType(),
                 ParkingSessionStatus.EXITED, session.paymentStatus(), session.entryTime(), session.entryGate(), session.staffId(), session.plateSource(),
                 session.qrLookupToken(), session.paymentOrderId(), session.amountPaid(), session.paidAt(), now, exitGate.trim(), exitPlate,
-                manualOverride, manualOverrideReason, suspiciousReason, session.lastExitPassId(), session.reservationId(), session.reservationCode(), session.createdAt(), now);
+                manualOverride, manualOverrideReason, suspiciousReason, session.lastExitPassId(), session.reservationId(), session.reservationCode(), session.ocrRequestId(), session.ocrCandidatePlate(), session.ocrConfidence(), session.createdAt(), now);
     }
 
     private CheckOutResponse toCheckOutResponse(ParkingSession session, boolean manualOverride, String reason, String message) {
@@ -462,7 +465,7 @@ public class ParkingSessionService {
 
     private ParkingSessionResponse toStaffResponse(ParkingSession session) {
         return new ParkingSessionResponse(session.id(), session.sessionCode(), session.vehiclePlate(), session.normalizedPlate(), session.vehicleType(),
-                session.status(), session.paymentStatus(), session.entryTime(), session.entryGate(), session.qrLookupToken(), session.reservationId(), session.reservationCode(), session.reservationId() != null,
+                session.status(), session.paymentStatus(), session.entryTime(), session.entryGate(), session.qrLookupToken(), session.reservationId(), session.reservationCode(), session.reservationId() != null, session.ocrRequestId(), session.ocrCandidatePlate(), session.ocrConfidence(),
                 publicTicketBaseUrl + "/api/public/tickets/" + session.qrLookupToken());
     }
 

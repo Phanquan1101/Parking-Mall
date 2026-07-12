@@ -268,6 +268,17 @@ Every test should retain the baseline happy-path, invalid-input, unauthorized-ro
 | TC-RES-016 | Parking check-in with reservation code | Internal consume is called and normal `UNPAID` session stores reservation fields | Automated |
 | TC-RES-017 | Gateway reservation routes | Public and protected routes forward correctly; internal consume is hidden | Automated |
 
+## 16. Slice 10 automated OCR-assist coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-OCR-006 | Vision OCR authentication and roles | Missing token is 401; staff/admin allowed; merchant denied | Automated |
+| TC-OCR-007 | Demo OCR upload | Valid image returns request ID, bounded confidence, and mandatory confirmation warning | Automated |
+| TC-OCR-008 | Low-confidence OCR | Null/uncertain candidate returns manual-entry warning | Automated |
+| TC-OCR-009 | OCR-assisted parking check-in | Staff-confirmed plate is authoritative; OCR metadata is stored; payment remains `UNPAID` | Automated |
+| TC-OCR-010 | OCR duplicate-plate regression | OCR-assisted check-in still rejects active duplicate plate | Automated |
+| TC-OCR-011 | Vision Gateway multipart route | Authorization and multipart image forward; internal Vision route remains hidden | Automated |
+
 ## 14. Canonical scenario checklist
 
 | Scenario | Expected Result | Rule/Area |

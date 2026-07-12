@@ -27,6 +27,9 @@ public record ParkingSession(
         String lastExitPassId,
         String reservationId,
         String reservationCode,
+        String ocrRequestId,
+        String ocrCandidatePlate,
+        Double ocrConfidence,
         Instant createdAt,
         Instant updatedAt) {
 }

@@ -21,4 +21,5 @@ gateway:
   payment-base-url: ${PAYMENT_SERVICE_BASE_URL:http://localhost:${PAYMENT_SERVICE_PORT:8083}}
   merchant-base-url: ${MERCHANT_SERVICE_BASE_URL:http://localhost:${MERCHANT_SERVICE_PORT:8084}}
   reservation-base-url: ${RESERVATION_SERVICE_BASE_URL:http://localhost:${RESERVATION_SERVICE_PORT:8085}}
+  vision-base-url: ${VISION_SERVICE_BASE_URL:http://localhost:${VISION_SERVICE_PORT:8090}}
   cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}

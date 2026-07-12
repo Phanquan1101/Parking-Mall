@@ -226,9 +226,11 @@ Slice 9 statuses are `RESERVED`, `CANCELLED`, `EXPIRED`, and `CONSUMED`. Interna
 
 | Method | Path | Role | Purpose |
 |---|---|---|---|
-| POST | `/api/vision/plate-recognition` | `PARKING_STAFF`, `ADMIN` | Return plate candidate and confidence |
+| POST | `/api/vision/ocr/plate` | `PARKING_STAFF`, `ADMIN` | Multipart image upload returning a demo candidate and confidence |
 
-OCR is assistive only. Staff confirmation or manual entry remains authoritative, and OCR failure must not block the parking flow.
+`POST /api/vision/ocr/plate` accepts multipart field `image` (JPEG, PNG, or WebP) plus optional `cameraId`/`gateId`. It returns `ocrRequestId`, `candidatePlate`, `normalizedCandidatePlate`, `confidence` (0–1), `provider`, warnings, and `createdAt`. The route requires `ADMIN` or `PARKING_STAFF`; `MERCHANT_STAFF` is denied.
+
+Parking check-in accepts optional `ocrRequestId`, `ocrCandidatePlate`, and `ocrConfidence` when `plateSource` is `OCR_ASSISTED`. `vehiclePlate` remains the confirmed staff value and source of truth. OCR is assistive only: it does not auto-create a session, bypass duplicate/reservation validation, authorize exit, or change payment/merchant/Exit Pass/check-out behavior.
 
 ## 11. Reports and dashboard
 

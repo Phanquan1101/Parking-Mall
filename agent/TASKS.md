@@ -108,9 +108,9 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-1001 | Draft vision-service contract | P1 | Plate candidate and confidence are documented | TODO |
-| T-1002 | Draft staff confirmation/correction flow | P0 | Manual plate entry remains authoritative | TODO |
-| T-1003 | Document OCR timeout fallback | P0 | OCR failure never blocks check-in/check-out | TODO |
+| T-1001 | Implement Vision OCR Assist endpoint | P1 | Authenticated image upload returns demo candidate and confidence | DONE |
+| T-1002 | Implement staff confirmation/correction flow | P0 | OCR candidate can be edited before normal check-in | DONE |
+| T-1003 | Preserve manual OCR fallback | P0 | OCR failure never blocks manual check-in | DONE |
 | T-1004 | Add plate correction audit criteria | P1 | Corrections are logged | TODO |
 
 ## Slice 11 - Dashboard

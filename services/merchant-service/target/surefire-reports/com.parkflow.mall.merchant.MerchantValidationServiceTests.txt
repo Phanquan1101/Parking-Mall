@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.parkflow.mall.merchant.MerchantValidationServiceTests
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.745 s -- in com.parkflow.mall.merchant.MerchantValidationServiceTests
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.475 s -- in com.parkflow.mall.merchant.MerchantValidationServiceTests

@@ -9,5 +9,8 @@ public record CheckInRequest(
         String entryGate,
         String staffId,
         PlateSource plateSource,
-        String reservationCode) {
+        String reservationCode,
+        String ocrRequestId,
+        String ocrCandidatePlate,
+        Double ocrConfidence) {
 }

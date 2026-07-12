@@ -70,6 +70,20 @@ class ParkingServiceApplicationTests {
     }
 
     @Test
+    void ocrAssistedCheckInKeepsConfirmedPlateAndStoresTraceMetadata() throws Exception {
+        String confirmedPlate = nextPlate();
+        MvcResult result = mockMvc.perform(post("/api/parking/sessions/check-in").header("Authorization", "Bearer " + staffToken())
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"vehiclePlate\":\"" + confirmedPlate + "\",\"vehicleType\":\"MOTORBIKE\",\"entryGate\":\"GATE_IN_01\",\"plateSource\":\"OCR_ASSISTED\",\"ocrRequestId\":\"ocr-1\",\"ocrCandidatePlate\":\"30A-99999\",\"ocrConfidence\":0.42}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.vehiclePlate").value(confirmedPlate.replace("-", "")))
+                .andExpect(jsonPath("$.ocrRequestId").value("ocr-1")).andExpect(jsonPath("$.ocrCandidatePlate").value("30A-99999"))
+                .andExpect(jsonPath("$.ocrConfidence").value(0.42)).andExpect(jsonPath("$.paymentStatus").value("UNPAID")).andReturn();
+        var session = parkingSessionRepository.findById(objectMapper.readTree(result.getResponse().getContentAsString()).path("sessionId").asText()).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertEquals("OCR_ASSISTED", session.plateSource().name());
+        org.junit.jupiter.api.Assertions.assertNull(session.lastExitPassId());
+        checkIn(confirmedPlate, staffToken()).andExpect(status().isConflict());
+    }
+
+    @Test
     void checkInCreatesActiveSessionWithOpaqueLookupToken() throws Exception {
         MvcResult result = checkIn(nextPlate(), staffToken())
                 .andExpect(status().isCreated())

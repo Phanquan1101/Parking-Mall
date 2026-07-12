@@ -29,7 +29,7 @@ This is a draft schema contract. MVP uses one Supabase PostgreSQL project with s
 
 ### parking_sessions
 
-`id` PK, `session_code` unique, `vehicle_plate`, `vehicle_plate_masked`, `vehicle_type`, `entry_time`, `exit_time`, `entry_gate_code`, `exit_gate_code`, `zone_code`, `entry_image_url`, `exit_image_url`, `entry_plate_confidence`, `exit_plate_confidence`, `status`, `payment_status`, `total_fee`, `discount_amount`, `final_fee`, `grace_period_until`, `reservation_id`, `created_by`, `created_at`, `updated_at`.
+`id` PK, `session_code` unique, `vehicle_plate`, `vehicle_plate_masked`, `vehicle_type`, `entry_time`, `exit_time`, `entry_gate_code`, `exit_gate_code`, `zone_code`, `entry_image_url`, `exit_image_url`, `entry_plate_confidence`, `exit_plate_confidence`, `ocr_request_id`, `ocr_candidate_plate`, `ocr_confidence`, `status`, `payment_status`, `total_fee`, `discount_amount`, `final_fee`, `grace_period_until`, `reservation_id`, `created_by`, `created_at`, `updated_at`. Slice 10 stores OCR trace fields in-memory only and does not persist images or create migrations.
 
 Canonical parking session statuses:
 

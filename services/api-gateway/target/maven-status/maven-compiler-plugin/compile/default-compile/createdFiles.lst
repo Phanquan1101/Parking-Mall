@@ -3,6 +3,9 @@ com\parkflow\mall\gateway\controller\PaymentGatewayController.class
 com\parkflow\mall\gateway\reservation\ReservationServiceProxy.class
 com\parkflow\mall\gateway\ApiGatewayApplication.class
 com\parkflow\mall\gateway\payment\PaymentServiceProxy.class
+com\parkflow\mall\gateway\vision\VisionServiceProxy.class
+com\parkflow\mall\gateway\controller\VisionGatewayController.class
+com\parkflow\mall\gateway\vision\VisionServiceProxy$1.class
 com\parkflow\mall\gateway\controller\ReservationGatewayController.class
 com\parkflow\mall\gateway\controller\ParkingGatewayController.class
 com\parkflow\mall\gateway\parking\ParkingServiceProxy.class
