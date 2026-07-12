@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.parkflow.mall.parking.model.ExitPass;
 import com.parkflow.mall.parking.model.ExitPassStatus;
 import com.parkflow.mall.parking.repository.ExitPassRepository;
+import com.parkflow.mall.parking.repository.ParkingSessionRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,6 +41,9 @@ class ParkingServiceApplicationTests {
 
     @Autowired
     private ExitPassRepository exitPassRepository;
+
+    @Autowired
+    private ParkingSessionRepository parkingSessionRepository;
 
     @Test
     void checkInCreatesActiveSessionWithOpaqueLookupToken() throws Exception {
@@ -226,6 +230,64 @@ class ParkingServiceApplicationTests {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void offlineSyncRequiresStaffJwtAndRequestIdempotencyKey() throws Exception {
+        mockMvc.perform(post("/api/parking/offline-sync").contentType(MediaType.APPLICATION_JSON).content(offlineSyncBody("event-a", "key-a", nextPlate(), "MOTORBIKE")))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/parking/offline-sync").header("Authorization", "Bearer " + token("merchant", "merchant", "Merchant", List.of("MERCHANT_STAFF")))
+                        .header("Idempotency-Key", "batch-a").contentType(MediaType.APPLICATION_JSON).content(offlineSyncBody("event-a", "key-a", nextPlate(), "MOTORBIKE")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/parking/offline-sync").header("Authorization", "Bearer " + staffToken()).contentType(MediaType.APPLICATION_JSON)
+                        .content(offlineSyncBody("event-b", "key-b", nextPlate(), "MOTORBIKE")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void offlineCheckInSyncCreatesOfficialActiveSessionWithJwtStaffIdentityAndLookupToken() throws Exception {
+        String eventId = "offline-" + UUID.randomUUID();
+        MvcResult result = offlineSync(eventId, "key-" + UUID.randomUUID(), nextPlate(), "MOTORBIKE", "batch-" + UUID.randomUUID(), staffToken())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("SYNCED"))
+                .andExpect(jsonPath("$.results[0].serverSessionId").isNotEmpty()).andExpect(jsonPath("$.results[0].sessionCode").isNotEmpty()).andReturn();
+        String sessionId = objectMapper.readTree(result.getResponse().getContentAsString()).path("results").get(0).path("serverSessionId").asText();
+        var session = parkingSessionRepository.findById(sessionId).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertEquals("usr_staff", session.staffId());
+        org.junit.jupiter.api.Assertions.assertFalse(session.qrLookupToken().isBlank());
+        mockMvc.perform(get("/api/parking/offline-sync/{eventId}", eventId).header("Authorization", "Bearer " + staffToken()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("SYNCED"));
+    }
+
+    @Test
+    void offlineSyncRejectsInvalidPayloadAndKeepsServerTruthForConflicts() throws Exception {
+        offlineSync("missing-" + UUID.randomUUID(), "key-" + UUID.randomUUID(), "", "MOTORBIKE", "batch-" + UUID.randomUUID(), staffToken())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("REJECTED"));
+        offlineSync("invalid-type-" + UUID.randomUUID(), "key-" + UUID.randomUUID(), nextPlate(), "TRUCK", "batch-" + UUID.randomUUID(), staffToken())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("REJECTED"));
+        String activePlate = nextPlate();
+        checkIn(activePlate, staffToken()).andExpect(status().isCreated());
+        offlineSync("conflict-" + UUID.randomUUID(), "key-" + UUID.randomUUID(), activePlate, "MOTORBIKE", "batch-" + UUID.randomUUID(), staffToken())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("CONFLICT"));
+    }
+
+    @Test
+    void duplicateOfflineEventOrEventIdempotencyKeyDoesNotCreateSecondSession() throws Exception {
+        String eventId = "duplicate-" + UUID.randomUUID();
+        String eventKey = "key-" + UUID.randomUUID();
+        MvcResult first = offlineSync(eventId, eventKey, nextPlate(), "MOTORBIKE", "batch-" + UUID.randomUUID(), staffToken())
+                .andExpect(status().isOk()).andReturn();
+        String firstSessionId = objectMapper.readTree(first.getResponse().getContentAsString()).path("results").get(0).path("serverSessionId").asText();
+        offlineSync(eventId, eventKey, nextPlate(), "MOTORBIKE", "batch-" + UUID.randomUUID(), staffToken())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("DUPLICATE"))
+                .andExpect(jsonPath("$.results[0].serverSessionId").value(firstSessionId));
+        offlineSync("different-" + UUID.randomUUID(), eventKey, nextPlate(), "MOTORBIKE", "batch-" + UUID.randomUUID(), staffToken())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("DUPLICATE"));
+    }
+
+    @Test
+    void unknownOfflineEventStatusIsSafeNotFound() throws Exception {
+        mockMvc.perform(get("/api/parking/offline-sync/unknown-event").header("Authorization", "Bearer " + staffToken()))
+                .andExpect(status().isNotFound());
+    }
+
     private JsonNode createSession() throws Exception {
         MvcResult result = checkIn(nextPlate(), staffToken()).andExpect(status().isCreated()).andReturn();
         return objectMapper.readTree(result.getResponse().getContentAsString());
@@ -267,6 +329,15 @@ class ParkingServiceApplicationTests {
         return mockMvc.perform(post("/api/parking/sessions/{sessionId}/manual-override", sessionId)
                 .header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
                 .content("{\"reason\":\"" + reason + "\",\"exitPlate\":\"" + plate + "\",\"exitGate\":\"GATE_OUT_01\"}"));
+    }
+
+    private org.springframework.test.web.servlet.ResultActions offlineSync(String eventId, String eventKey, String plate, String vehicleType, String batchKey, String token) throws Exception {
+        return mockMvc.perform(post("/api/parking/offline-sync").header("Authorization", "Bearer " + token).header("Idempotency-Key", batchKey)
+                .contentType(MediaType.APPLICATION_JSON).content(offlineSyncBody(eventId, eventKey, plate, vehicleType)));
+    }
+
+    private String offlineSyncBody(String eventId, String eventKey, String plate, String vehicleType) {
+        return "{\"deviceId\":\"staff-device-test\",\"events\":[{\"eventId\":\"" + eventId + "\",\"eventType\":\"OFFLINE_CHECK_IN\",\"idempotencyKey\":\"" + eventKey + "\",\"localTimestamp\":\"" + Instant.now() + "\",\"payload\":{\"vehiclePlate\":\"" + plate + "\",\"vehicleType\":\"" + vehicleType + "\",\"entryGate\":\"GATE_IN_01\",\"plateSource\":\"MANUAL\"}}]}";
     }
 
     private org.springframework.test.web.servlet.ResultActions checkIn(String plate, String token) throws Exception {

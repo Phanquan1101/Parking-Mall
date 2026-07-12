@@ -9,6 +9,12 @@ import com.parkflow.mall.parking.dto.InternalPaymentUpdateRequest;
 import com.parkflow.mall.parking.dto.InternalPaymentUpdateResponse;
 import com.parkflow.mall.parking.dto.ManualOverrideRequest;
 import com.parkflow.mall.parking.dto.ParkingSessionResponse;
+import com.parkflow.mall.parking.dto.OfflineCheckInPayload;
+import com.parkflow.mall.parking.dto.OfflineEventStatusResponse;
+import com.parkflow.mall.parking.dto.OfflineSyncEventRequest;
+import com.parkflow.mall.parking.dto.OfflineSyncRequest;
+import com.parkflow.mall.parking.dto.OfflineSyncResponse;
+import com.parkflow.mall.parking.dto.OfflineSyncResult;
 import com.parkflow.mall.parking.dto.PublicTicketResponse;
 import com.parkflow.mall.parking.dto.ValidateExitPassRequest;
 import com.parkflow.mall.parking.dto.ValidateExitPassResponse;
@@ -20,8 +26,13 @@ import com.parkflow.mall.parking.model.ParkingSessionEvent;
 import com.parkflow.mall.parking.model.ParkingSessionStatus;
 import com.parkflow.mall.parking.model.PaymentStatus;
 import com.parkflow.mall.parking.model.PlateSource;
+import com.parkflow.mall.parking.model.VehicleType;
+import com.parkflow.mall.parking.model.OfflineEvent;
+import com.parkflow.mall.parking.model.OfflineEventType;
+import com.parkflow.mall.parking.model.OfflineSyncStatus;
 import com.parkflow.mall.parking.repository.ExitPassRepository;
 import com.parkflow.mall.parking.repository.ParkingSessionRepository;
+import com.parkflow.mall.parking.repository.OfflineEventRepository;
 import com.parkflow.mall.parking.security.AuthenticatedUser;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -43,6 +54,7 @@ public class ParkingSessionService {
     private static final SecureRandom TOKEN_RANDOM = new SecureRandom();
     private final ParkingSessionRepository repository;
     private final ExitPassRepository exitPassRepository;
+    private final OfflineEventRepository offlineEventRepository;
     private final ParkingSessionEventRecorder eventRecorder;
     private final String publicTicketBaseUrl;
     private final long demoFlatFee;
@@ -52,12 +64,14 @@ public class ParkingSessionService {
     public ParkingSessionService(
             ParkingSessionRepository repository,
             ExitPassRepository exitPassRepository,
+            OfflineEventRepository offlineEventRepository,
             ParkingSessionEventRecorder eventRecorder,
             @Value("${app.public-ticket-base-url}") String publicTicketBaseUrl,
             @Value("${app.demo-flat-fee:5000}") long demoFlatFee,
             @Value("${app.exit-pass-ttl-seconds:60}") long exitPassTtlSeconds) {
         this.repository = repository;
         this.exitPassRepository = exitPassRepository;
+        this.offlineEventRepository = offlineEventRepository;
         this.eventRecorder = eventRecorder;
         this.publicTicketBaseUrl = publicTicketBaseUrl.replaceAll("/$", "");
         this.demoFlatFee = demoFlatFee;
@@ -224,6 +238,102 @@ public class ParkingSessionService {
                 session.suspiciousReason(), session.lastExitPassId(), session.createdAt(), now));
         eventRecorder.record(new ParkingSessionEvent("PAYMENT_CONFIRMED", sessionId, "payment-service", now));
         return new InternalPaymentUpdateResponse(sessionId, PaymentStatus.PAID, request.amountPaid(), true);
+    }
+
+    public synchronized OfflineSyncResponse syncOfflineEvents(OfflineSyncRequest request, String syncRequestIdempotencyKey, AuthenticatedUser actor) {
+        if (isBlank(syncRequestIdempotencyKey)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Idempotency-Key header is required");
+        }
+        if (request == null || isBlank(request.deviceId()) || request.events() == null || request.events().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "deviceId and at least one event are required");
+        }
+        List<OfflineSyncResult> results = request.events().stream()
+                .map(event -> syncOfflineEvent(request.deviceId().trim(), event, syncRequestIdempotencyKey, actor))
+                .toList();
+        return new OfflineSyncResponse(UUID.randomUUID().toString(), request.deviceId().trim(), results);
+    }
+
+    public OfflineEventStatusResponse getOfflineEventStatus(String eventId) {
+        OfflineEvent event = offlineEventRepository.findByEventId(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offline event not found"));
+        return new OfflineEventStatusResponse(event.eventId(), event.status(), event.serverSessionId(), event.sessionCode(), event.message());
+    }
+
+    private OfflineSyncResult syncOfflineEvent(String deviceId, OfflineSyncEventRequest request, String syncRequestKey, AuthenticatedUser actor) {
+        if (request == null || isBlank(request.eventId()) || isBlank(request.idempotencyKey())) {
+            String eventId = request == null || request.eventId() == null ? "unknown" : request.eventId();
+            return new OfflineSyncResult(eventId, OfflineSyncStatus.REJECTED, null, null, "eventId and idempotencyKey are required.");
+        }
+        OfflineEvent existing = offlineEventRepository.findByEventId(request.eventId())
+                .or(() -> offlineEventRepository.findByEventIdempotencyKey(request.idempotencyKey()))
+                .orElse(null);
+        if (existing != null) {
+            return new OfflineSyncResult(request.eventId(), OfflineSyncStatus.DUPLICATE, existing.serverSessionId(), existing.sessionCode(),
+                    "Offline event was already processed: " + existing.status());
+        }
+        OfflineCheckInPayload payload = request.payload();
+        OfflineEventType type;
+        try {
+            type = OfflineEventType.valueOf(request.eventType() == null ? "" : request.eventType().trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            return persistOfflineResult(request, deviceId, syncRequestKey, actor, null, OfflineSyncStatus.REJECTED, null, null,
+                    "Unsupported offline event type.", null);
+        }
+        if (type != OfflineEventType.OFFLINE_CHECK_IN) {
+            return persistOfflineResult(request, deviceId, syncRequestKey, actor, payload, OfflineSyncStatus.MANUAL_REVIEW_REQUIRED, null, null,
+                    "Offline event requires manual review.", "Only OFFLINE_CHECK_IN is supported in Slice 6.");
+        }
+        if (payload == null || isBlank(payload.vehiclePlate()) || isBlank(payload.entryGate())) {
+            return persistOfflineResult(request, deviceId, syncRequestKey, actor, payload, OfflineSyncStatus.REJECTED, null, null,
+                    "vehiclePlate and entryGate are required.", null);
+        }
+        VehicleType vehicleType;
+        try {
+            vehicleType = VehicleType.valueOf(payload.vehicleType() == null ? "" : payload.vehicleType().trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            return persistOfflineResult(request, deviceId, syncRequestKey, actor, payload, OfflineSyncStatus.REJECTED, null, null,
+                    "vehicleType is invalid.", null);
+        }
+        String normalizedPlate = normalizePlate(payload.vehiclePlate());
+        if (normalizedPlate.isBlank()) {
+            return persistOfflineResult(request, deviceId, syncRequestKey, actor, payload, OfflineSyncStatus.REJECTED, null, null,
+                    "vehiclePlate is required.", null);
+        }
+        if (repository.existsActiveByNormalizedPlate(normalizedPlate)) {
+            return persistOfflineResult(request, deviceId, syncRequestKey, actor, payload, OfflineSyncStatus.CONFLICT, null, null,
+                    "Offline check-in conflicts with an active server session.", "ACTIVE_SESSION_FOR_NORMALIZED_PLATE");
+        }
+        Instant now = Instant.now();
+        ParkingSession session = new ParkingSession(UUID.randomUUID().toString(), nextSessionCode(now), normalizedPlate, normalizedPlate,
+                vehicleType, ParkingSessionStatus.ACTIVE, PaymentStatus.UNPAID, now, payload.entryGate().trim(), actor.id(), PlateSource.MANUAL,
+                nextToken(), null, null, null, null, null, null, false, null, null, null, now, now);
+        if (!repository.saveIfNoActive(session)) {
+            return persistOfflineResult(request, deviceId, syncRequestKey, actor, payload, OfflineSyncStatus.CONFLICT, null, null,
+                    "Offline check-in conflicts with an active server session.", "ACTIVE_SESSION_FOR_NORMALIZED_PLATE");
+        }
+        eventRecorder.record(new ParkingSessionEvent("OFFLINE_CHECK_IN_SYNCED", session.id(), actor.id(), now, "eventId=" + request.eventId()));
+        return persistOfflineResult(request, deviceId, syncRequestKey, actor, payload, OfflineSyncStatus.SYNCED, session.id(), session.sessionCode(),
+                "Offline check-in synced successfully.", null);
+    }
+
+    private OfflineSyncResult persistOfflineResult(OfflineSyncEventRequest request, String deviceId, String syncRequestKey,
+            AuthenticatedUser actor, OfflineCheckInPayload payload, OfflineSyncStatus status, String serverSessionId, String sessionCode,
+            String message, String conflictReason) {
+        OfflineEvent event = new OfflineEvent(request.eventId(), parseOfflineEventType(request.eventType()), request.idempotencyKey(),
+                syncRequestKey, deviceId, actor.username(), request.localTimestamp(), Instant.now(), payload == null ? null : payload.vehiclePlate(),
+                payload == null ? null : payload.vehicleType(), payload == null ? null : payload.entryGate(), payload == null ? null : payload.plateSource(),
+                status, serverSessionId, sessionCode, message, conflictReason);
+        offlineEventRepository.save(event);
+        if (status == OfflineSyncStatus.CONFLICT || status == OfflineSyncStatus.REJECTED) {
+            eventRecorder.record(new ParkingSessionEvent("OFFLINE_SYNC_" + status, serverSessionId == null ? "offline-event" : serverSessionId,
+                    actor.id(), Instant.now(), "eventId=" + request.eventId() + (conflictReason == null ? "" : "; " + conflictReason)));
+        }
+        return new OfflineSyncResult(request.eventId(), status, serverSessionId, sessionCode, message);
+    }
+
+    private OfflineEventType parseOfflineEventType(String eventType) {
+        try { return OfflineEventType.valueOf(eventType == null ? "OFFLINE_CHECK_IN" : eventType.trim().toUpperCase(Locale.ROOT)); }
+        catch (IllegalArgumentException exception) { return OfflineEventType.OFFLINE_CHECK_IN; }
     }
 
     public static String normalizePlate(String plate) { return plate.replaceAll("[\\s-]", "").toUpperCase(Locale.ROOT); }

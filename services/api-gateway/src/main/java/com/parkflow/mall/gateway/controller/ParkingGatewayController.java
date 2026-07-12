@@ -73,4 +73,19 @@ public class ParkingGatewayController {
             @RequestBody String requestBody) {
         return parkingServiceProxy.manualOverride(authorization, sessionId, requestBody);
     }
+
+    @PostMapping("/api/parking/offline-sync")
+    public ResponseEntity<String> syncOfflineEvents(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestBody String requestBody) {
+        return parkingServiceProxy.syncOfflineEvents(authorization, idempotencyKey, requestBody);
+    }
+
+    @GetMapping("/api/parking/offline-sync/{eventId}")
+    public ResponseEntity<String> getOfflineEventStatus(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @PathVariable String eventId) {
+        return parkingServiceProxy.getOfflineEventStatus(authorization, eventId);
+    }
 }

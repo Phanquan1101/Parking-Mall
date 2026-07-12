@@ -161,7 +161,13 @@ The implemented public ticket response also includes `canGenerateExitPass`, `exi
 | POST | `/api/parking/offline-sync` | `PARKING_STAFF`, `ADMIN` | Submit queued offline events |
 | GET | `/api/parking/offline-sync/{eventId}` | `PARKING_STAFF`, `ADMIN` | Retrieve synchronization result |
 
-The `POST` request requires an `Idempotency-Key` header. Each event also contains `eventId`, `deviceId`, `staffId`, timestamp, event type, and payload. Results are `ACCEPTED`, `REJECTED`, `CONFLICT`, `DUPLICATE`, or `MANUAL_REVIEW_REQUIRED`.
+### Slice 6 implemented offline sync
+
+`POST /api/parking/offline-sync` requires an `ADMIN` or `PARKING_STAFF` JWT and a nonblank `Idempotency-Key` header. It accepts a `deviceId` and events containing `eventId`, `idempotencyKey`, `localTimestamp`, `eventType`, and payload. Staff identity comes from JWT, never the client payload.
+
+Only `OFFLINE_CHECK_IN` is fully supported. A valid event creates an official `ACTIVE` session with QR Lookup Token and returns `SYNCED`; invalid payloads return `REJECTED`; duplicate active normalized plates return `CONFLICT`; duplicate event ID/idempotency key returns `DUPLICATE` without creating another session. `GET /api/parking/offline-sync/{eventId}` requires the same role and returns the stored result or safe `404`.
+
+Event statuses are `PENDING`, `SYNCING`, `SYNCED`, `DUPLICATE`, `REJECTED`, `CONFLICT`, and `MANUAL_REVIEW_REQUIRED`. The server result is authoritative after sync. Offline check-out is not supported and never performs automatic vehicle exit in Slice 6.
 
 ## 7. Payment
 

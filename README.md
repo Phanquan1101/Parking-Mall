@@ -4,9 +4,9 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
-Slice 5 - Dynamic Exit Pass + Check-out is complete. A paid customer can generate a short-lived, one-time Exit Pass; authorized staff can validate the pass and matching plate before checking out the vehicle. QR Lookup remains ticket lookup only.
+Slice 6 - Offline Staff Mode is complete. Staff can create local offline check-in events and synchronize them idempotently when online; the server returns authoritative synced, rejected, or conflict results.
 
-Next slice: Slice 6 - Offline Staff Mode.
+Next slice: Slice 7 - Merchant Invoice Aggregation.
 
 ## Tech stack
 
@@ -170,6 +170,10 @@ Manual Slice 5 demo flow:
 6. Confirm the ticket/session status is `EXITED`; reusing the pass is rejected.
 
 QR Lookup Token cannot authorize exit. Dynamic Exit Pass is opaque, short-lived (60 seconds by default), and one-time use. Staff manual override still requires payment verification and a reason.
+
+Manual Slice 6 offline demo flow: log in as `staff`, open `http://localhost:5173/staff/offline`, paste the JWT, add an offline check-in while offline, then return online and sync. The server returns an official session ID/code for `SYNCED`, and a same-plate event becomes `CONFLICT`.
+
+Only offline check-in is supported in Slice 6. Offline check-out never automatically exits a vehicle, and rejected/conflicted queue entries remain visible for staff review.
 
 Run the vision placeholder:
 

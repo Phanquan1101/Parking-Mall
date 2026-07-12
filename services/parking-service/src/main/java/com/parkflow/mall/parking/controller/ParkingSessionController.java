@@ -12,6 +12,9 @@ import com.parkflow.mall.parking.dto.ValidateExitPassResponse;
 import com.parkflow.mall.parking.dto.CheckOutRequest;
 import com.parkflow.mall.parking.dto.CheckOutResponse;
 import com.parkflow.mall.parking.dto.ManualOverrideRequest;
+import com.parkflow.mall.parking.dto.OfflineEventStatusResponse;
+import com.parkflow.mall.parking.dto.OfflineSyncRequest;
+import com.parkflow.mall.parking.dto.OfflineSyncResponse;
 import com.parkflow.mall.parking.security.AuthenticatedUser;
 import com.parkflow.mall.parking.service.ParkingSessionService;
 import java.util.List;
@@ -91,6 +94,19 @@ public class ParkingSessionController {
             @RequestBody ManualOverrideRequest request,
             @AuthenticationPrincipal AuthenticatedUser actor) {
         return parkingSessionService.manualOverride(sessionId, request, actor);
+    }
+
+    @PostMapping("/api/parking/offline-sync")
+    public OfflineSyncResponse syncOfflineEvents(
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestBody OfflineSyncRequest request,
+            @AuthenticationPrincipal AuthenticatedUser actor) {
+        return parkingSessionService.syncOfflineEvents(request, idempotencyKey, actor);
+    }
+
+    @GetMapping("/api/parking/offline-sync/{eventId}")
+    public OfflineEventStatusResponse getOfflineEventStatus(@PathVariable String eventId) {
+        return parkingSessionService.getOfflineEventStatus(eventId);
     }
 
     @PostMapping("/internal/parking/sessions/{sessionId}/payment-status")

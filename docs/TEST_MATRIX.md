@@ -107,6 +107,20 @@ Every vertical slice must include:
 | TC-S5-GATE-001 | Gateway Exit Pass routes | Public create and protected validate/check-out routes forward correctly | Implemented |
 | TC-S5-WEB-001 | Paid customer ticket | Generate Exit Pass button and issued-pass warning render | Build verified |
 
+### Slice 6 implemented coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-S6-OFF-001 | Sync without JWT or with merchant JWT | `401` / `403` | Implemented |
+| TC-S6-OFF-002 | Sync without `Idempotency-Key` | `400 Bad Request` | Implemented |
+| TC-S6-OFF-003 | Valid OFFLINE_CHECK_IN | Official `ACTIVE` server session, QR Lookup Token, ID, and code | Implemented |
+| TC-S6-OFF-004 | Missing plate or invalid vehicle type | Per-event `REJECTED` result | Implemented |
+| TC-S6-OFF-005 | Duplicate event ID or event idempotency key | `DUPLICATE`; no second session | Implemented |
+| TC-S6-OFF-006 | Existing active normalized plate | Per-event `CONFLICT`; server state wins | Implemented |
+| TC-S6-OFF-007 | Event result lookup | Stored result returned; unknown event is `404` | Implemented |
+| TC-S6-GATE-001 | Gateway sync and status routes | Authorization and idempotency header are forwarded | Implemented |
+| TC-S6-WEB-001 | Offline Staff Console | Local queue, connection state, and build verified | Implemented |
+
 ## 5. Payment tests
 
 | Test ID | Scenario | Expected Result | Priority |

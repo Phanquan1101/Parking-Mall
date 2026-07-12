@@ -63,9 +63,11 @@ Slice 5 uses an in-memory repository only; this remains the persistence contract
 
 ### offline_events
 
-`id` PK, `event_id` unique, `device_id`, `staff_id`, `event_type`, `occurred_at`, `received_at`, `idempotency_key` unique, `payload_json`, `sync_status`, `server_resource_id`, `conflict_reason`.
+`id` PK, `event_id` unique, `device_id`, `staff_id`, `event_type`, `occurred_at`, `received_at`, `event_idempotency_key` unique, `sync_request_idempotency_key`, `payload_json`, `sync_status`, `server_resource_id`, `conflict_reason`.
 
-Sync statuses: `PENDING`, `SYNCING`, `ACCEPTED`, `DUPLICATE`, `REJECTED`, `CONFLICT`, `MANUAL_REVIEW_REQUIRED`.
+Sync statuses: `PENDING`, `SYNCING`, `SYNCED`, `DUPLICATE`, `REJECTED`, `CONFLICT`, `MANUAL_REVIEW_REQUIRED`.
+
+Slice 6 uses `InMemoryOfflineEventRepository`; no migration is created. Only `OFFLINE_CHECK_IN` creates an official parking session during sync.
 
 ### sync_conflicts
 

@@ -69,4 +69,17 @@ class ParkingGatewayControllerTests {
                         .content("{\"exitPassToken\":\"pass-1\",\"exitGate\":\"GATE_OUT_01\",\"exitPlate\":\"59A1-12345\"}"))
                 .andExpect(status().isOk()).andExpect(content().json("{\"status\":\"EXITED\"}"));
     }
+
+    @Test
+    void offlineSyncRoutesForwardAuthorizationAndIdempotencyKey() throws Exception {
+        when(parkingServiceProxy.syncOfflineEvents(anyString(), anyString(), anyString()))
+                .thenReturn(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body("{\"results\":[{\"status\":\"SYNCED\"}]}"));
+        when(parkingServiceProxy.getOfflineEventStatus(anyString(), anyString()))
+                .thenReturn(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body("{\"status\":\"SYNCED\"}"));
+        mockMvc.perform(post("/api/parking/offline-sync").header("Authorization", "Bearer staff-token").header("Idempotency-Key", "batch-key")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"deviceId\":\"device\",\"events\":[]}"))
+                .andExpect(status().isOk()).andExpect(content().json("{\"results\":[{\"status\":\"SYNCED\"}]}"));
+        mockMvc.perform(get("/api/parking/offline-sync/event-1").header("Authorization", "Bearer staff-token"))
+                .andExpect(status().isOk()).andExpect(content().json("{\"status\":\"SYNCED\"}"));
+    }
 }

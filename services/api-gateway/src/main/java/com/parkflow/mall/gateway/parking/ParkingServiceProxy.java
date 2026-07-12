@@ -69,6 +69,17 @@ public class ParkingServiceProxy {
         return forward("/api/parking/sessions/" + sessionId + "/manual-override", HttpMethod.POST, new HttpEntity<>(requestBody, headers));
     }
 
+    public ResponseEntity<String> syncOfflineEvents(String authorization, String idempotencyKey, String requestBody) {
+        HttpHeaders headers = headersWithAuthorization(authorization);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        if (idempotencyKey != null) headers.set("Idempotency-Key", idempotencyKey);
+        return forward("/api/parking/offline-sync", HttpMethod.POST, new HttpEntity<>(requestBody, headers));
+    }
+
+    public ResponseEntity<String> getOfflineEventStatus(String authorization, String eventId) {
+        return forward("/api/parking/offline-sync/" + eventId, HttpMethod.GET, new HttpEntity<>(headersWithAuthorization(authorization)));
+    }
+
     private HttpHeaders headersWithAuthorization(String authorization) {
         HttpHeaders headers = new HttpHeaders();
         if (authorization != null) {

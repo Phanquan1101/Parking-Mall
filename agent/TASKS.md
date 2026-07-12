@@ -67,12 +67,12 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-0601 | Document Online/Offline/Syncing state | P0 | Staff status is visible | TODO |
-| T-0602 | Draft local active-session cache | P0 | Minimum data and TTL are specified | TODO |
-| T-0603 | Draft offline event queue | P0 | Event ID, device ID, staff ID, timestamp, and `Idempotency-Key` are required | TODO |
-| T-0604 | Draft offline sync API | P0 | `/api/parking/offline-sync` is idempotent | TODO |
-| T-0605 | Document conflict handling | P0 | Accepted, rejected, duplicate, and conflict states are visible | TODO |
-| T-0606 | Add sync audit/fraud criteria | P0 | Conflicts and manual offline exits are logged | TODO |
+| T-0601 | Implement Online/Offline/Syncing state | P0 | Staff Offline Console visibly shows connection and sync state | DONE |
+| T-0602 | Define basic local queue scope | P0 | localStorage queue stores only offline check-in events for Slice 6 | DONE |
+| T-0603 | Implement offline event queue | P0 | Event ID, device ID, local timestamp, payload, and idempotency key persist locally | DONE |
+| T-0604 | Implement offline sync API | P0 | `/api/parking/offline-sync` is protected and idempotent per event | DONE |
+| T-0605 | Implement conflict handling | P0 | `SYNCED`, `DUPLICATE`, `REJECTED`, and `CONFLICT` remain visible | DONE |
+| T-0606 | Add sync audit/fraud criteria | P0 | Conflicts/rejections emit lightweight events; offline check-out remains unsupported | DONE |
 
 ## Slice 7 - Merchant Invoice Aggregation
 

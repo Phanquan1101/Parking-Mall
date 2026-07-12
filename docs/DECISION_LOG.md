@@ -199,6 +199,27 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: Staff need a controlled lost-phone exception without creating an unpaid vehicle-exit path.
 - Consequences: Plate mismatches are retained as a suspicious reason when override is used; full audit/fraud storage remains later work.
 
+## ADR-029
+
+- Status: Accepted
+- Decision: Slice 6 stores the browser offline queue in localStorage and uses a stable locally generated device ID.
+- Rationale: It is sufficient for a small demo queue while keeping the implementation ready to move to IndexedDB later.
+- Consequences: The queue is browser/device scoped and contains only minimum check-in data; rejected/conflicted items remain visible.
+
+## ADR-030
+
+- Status: Accepted
+- Decision: Slice 6 stores synced OfflineEvent results in `InMemoryOfflineEventRepository` and supports only `OFFLINE_CHECK_IN` as an official offline operation.
+- Rationale: It proves event-level idempotency and conflict behavior without migrations or unsafe offline exit behavior.
+- Consequences: Events are reset on Parking Service restart; offline check-out, payment, merchant validation, and reservation are not implemented.
+
+## ADR-031
+
+- Status: Accepted
+- Decision: The server is source of truth after offline sync; duplicate event ID/idempotency keys return `DUPLICATE`, and active-plate conflicts return `CONFLICT`.
+- Rationale: A local queue cannot safely decide authoritative parking state after reconnection.
+- Consequences: The Staff Console preserves terminal conflict/rejection results for manual follow-up.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?
