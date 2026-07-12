@@ -4,9 +4,11 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
-Slice 6 - Offline Staff Mode is complete. Staff can create local offline check-in events and synchronize them idempotently when online; the server returns authoritative synced, rejected, or conflict results.
+Slice 7 - Merchant Invoice Aggregation is complete. Online merchant/admin invoice validation aggregates invoices per parking session and applies the temporary configured discount rule.
 
-Next slice: Slice 7 - Merchant Invoice Aggregation.
+Next slice: Slice 8 - Payment Reconciliation.
+
+Merchant demo: open `http://localhost:5173/merchant/validate`, paste a Merchant/Admin JWT, enter the QR Lookup Token plus invoice code/amount. The demo rule applies a `5000` discount when aggregate eligible invoices reach `300000`; invoice codes are globally single-use.
 
 ## Tech stack
 

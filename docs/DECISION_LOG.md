@@ -220,6 +220,18 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: A local queue cannot safely decide authoritative parking state after reconnection.
 - Consequences: The Staff Console preserves terminal conflict/rejection results for manual follow-up.
 
+## ADR-032
+
+- Status: Accepted
+- Decision: Slice 7 keeps invoice validations in memory and maps demo username `merchant` to `tenant-demo-001`; `ADMIN` has demo override access.
+- Rationale: This proves tenant-scoped online validation without a migration or POS integration.
+
+## ADR-033
+
+- Status: Accepted
+- Decision: Use temporary `AGGREGATE_INVOICE` threshold `300000` and discount `5000`, capped at estimated parking fee.
+- Rationale: It demonstrates aggregation while deferring real merchant rules and accounting.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

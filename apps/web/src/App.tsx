@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { CustomerTicketPage } from "./pages/CustomerTicketPage";
 import { HomePage } from "./pages/HomePage";
 import { StaffOfflinePage } from "./pages/StaffOfflinePage";
+import { MerchantValidationPage } from "./pages/MerchantValidationPage";
 
 export default function App() {
   return (
@@ -9,6 +10,7 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/tickets/:lookupToken?" element={<CustomerTicketPage />} />
       <Route path="/staff/offline" element={<StaffOfflinePage />} />
+      <Route path="/merchant/validate" element={<MerchantValidationPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -7,6 +7,8 @@ import com.parkflow.mall.parking.dto.ExitPassResponse;
 import com.parkflow.mall.parking.dto.GenerateExitPassRequest;
 import com.parkflow.mall.parking.dto.InternalPaymentUpdateRequest;
 import com.parkflow.mall.parking.dto.InternalPaymentUpdateResponse;
+import com.parkflow.mall.parking.dto.InternalDiscountUpdateRequest;
+import com.parkflow.mall.parking.dto.InternalDiscountUpdateResponse;
 import com.parkflow.mall.parking.dto.ManualOverrideRequest;
 import com.parkflow.mall.parking.dto.ParkingSessionResponse;
 import com.parkflow.mall.parking.dto.OfflineCheckInPayload;
@@ -22,6 +24,7 @@ import com.parkflow.mall.parking.exception.ExitPassException;
 import com.parkflow.mall.parking.model.ExitPass;
 import com.parkflow.mall.parking.model.ExitPassStatus;
 import com.parkflow.mall.parking.model.ParkingSession;
+import com.parkflow.mall.parking.model.MerchantDiscountState;
 import com.parkflow.mall.parking.model.ParkingSessionEvent;
 import com.parkflow.mall.parking.model.ParkingSessionStatus;
 import com.parkflow.mall.parking.model.PaymentStatus;
@@ -43,6 +46,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -60,6 +65,7 @@ public class ParkingSessionService {
     private final long demoFlatFee;
     private final long exitPassTtlSeconds;
     private final AtomicLong sequence = new AtomicLong();
+    private final Map<String, MerchantDiscountState> merchantDiscounts = new ConcurrentHashMap<>();
 
     public ParkingSessionService(
             ParkingSessionRepository repository,
@@ -118,6 +124,7 @@ public class ParkingSessionService {
         ParkingSession session = repository.findByLookupToken(lookupToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
         long duration = Math.max(0, Duration.between(session.entryTime(), Instant.now()).toMinutes());
+        MerchantDiscountState discount = discountFor(session.id());
         boolean eligible = isExitEligible(session);
         boolean activePass = exitPassRepository.findActiveBySessionId(session.id()).isPresent();
         String exitPassMessage = session.status() == ParkingSessionStatus.EXITED
@@ -125,7 +132,8 @@ public class ParkingSessionService {
                 : eligible ? (activePass ? "A current Exit Pass exists. Generate a new one only if needed." : "Payment complete. Generate an Exit Pass before leaving.")
                 : "Complete payment before generating an Exit Pass.";
         return new PublicTicketResponse(session.id(), session.sessionCode(), session.vehiclePlate(), session.vehicleType(),
-                session.status(), session.paymentStatus(), session.entryTime(), duration, demoFlatFee, 0, demoFlatFee,
+                session.status(), session.paymentStatus(), session.entryTime(), duration, demoFlatFee, discount.discountAmount(), discount.finalFee(),
+                discount.totalEligibleInvoiceAmount(), discount.discountPolicy(), discount.discountAmount() > 0 ? "Merchant invoice discount applied." : "No merchant discount applied.",
                 eligible, activePass, exitPassMessage,
                 "QR Lookup Token is for ticket lookup only and cannot authorize exit.");
     }
@@ -238,6 +246,25 @@ public class ParkingSessionService {
                 session.suspiciousReason(), session.lastExitPassId(), session.createdAt(), now));
         eventRecorder.record(new ParkingSessionEvent("PAYMENT_CONFIRMED", sessionId, "payment-service", now));
         return new InternalPaymentUpdateResponse(sessionId, PaymentStatus.PAID, request.amountPaid(), true);
+    }
+
+    public synchronized InternalDiscountUpdateResponse updateMerchantDiscount(String sessionId, InternalDiscountUpdateRequest request) {
+        if (request == null || request.discountAmount() < 0 || request.totalEligibleInvoiceAmount() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Discount values cannot be negative");
+        }
+        ParkingSession session = findSessionById(sessionId);
+        if (session.status() == ParkingSessionStatus.EXITED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Exited session cannot receive merchant discount");
+        }
+        if (request.discountAmount() > demoFlatFee) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Discount cannot exceed estimated fee");
+        }
+        long finalFee = Math.max(demoFlatFee - request.discountAmount(), 0);
+        MerchantDiscountState state = new MerchantDiscountState(request.totalEligibleInvoiceAmount(), request.discountAmount(), finalFee,
+                request.discountPolicy() == null || request.discountPolicy().isBlank() ? "AGGREGATE_INVOICE" : request.discountPolicy());
+        merchantDiscounts.put(sessionId, state);
+        eventRecorder.record(new ParkingSessionEvent("MERCHANT_DISCOUNT_UPDATED", sessionId, request.updatedBy(), Instant.now(), "total=" + request.totalEligibleInvoiceAmount()));
+        return new InternalDiscountUpdateResponse(sessionId, demoFlatFee, state.discountAmount(), state.finalFee(), state.totalEligibleInvoiceAmount(), true);
     }
 
     public synchronized OfflineSyncResponse syncOfflineEvents(OfflineSyncRequest request, String syncRequestIdempotencyKey, AuthenticatedUser actor) {
@@ -365,8 +392,10 @@ public class ParkingSessionService {
     }
 
     private boolean isExitEligible(ParkingSession session) {
-        return session.status() != ParkingSessionStatus.EXITED && (session.paymentStatus() == PaymentStatus.PAID || demoFlatFee == 0);
+        return session.status() != ParkingSessionStatus.EXITED && (session.paymentStatus() == PaymentStatus.PAID || discountFor(session.id()).finalFee() == 0);
     }
+
+    private MerchantDiscountState discountFor(String sessionId) { return merchantDiscounts.getOrDefault(sessionId, new MerchantDiscountState(0, 0, demoFlatFee, "AGGREGATE_INVOICE")); }
 
     private ParkingSession copyWithExitPass(ParkingSession session, String passId, Instant now) {
         return new ParkingSession(session.id(), session.sessionCode(), session.vehiclePlate(), session.normalizedPlate(), session.vehicleType(),

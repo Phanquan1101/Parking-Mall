@@ -288,6 +288,34 @@ class ParkingServiceApplicationTests {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void internalMerchantDiscountRequiresValidTokenAndUpdatesOnlyTicketFeeFields() throws Exception {
+        JsonNode session = createSession();
+        String sessionId = session.path("sessionId").asText();
+        mockMvc.perform(post("/internal/parking/sessions/{sessionId}/discount", sessionId)
+                        .contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/internal/parking/sessions/{sessionId}/discount", sessionId)
+                        .header("X-Internal-Service-Token", "wrong").contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/internal/parking/sessions/{sessionId}/discount", sessionId)
+                        .header("X-Internal-Service-Token", "parkflow-local-internal-token-change-me").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"source\":\"MERCHANT_VALIDATION\",\"totalEligibleInvoiceAmount\":300000,\"discountAmount\":5000,\"discountPolicy\":\"AGGREGATE_INVOICE\",\"updatedBy\":\"merchant-service\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.discountAmount").value(5000)).andExpect(jsonPath("$.finalFee").value(0));
+        mockMvc.perform(get("/api/public/tickets/{lookupToken}", session.path("qrLookupToken").asText()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalEligibleInvoiceAmount").value(300000))
+                .andExpect(jsonPath("$.discountAmount").value(5000)).andExpect(jsonPath("$.finalFee").value(0))
+                .andExpect(jsonPath("$.merchantDiscountMessage").isNotEmpty());
+        var stored = parkingSessionRepository.findById(sessionId).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertEquals("UNPAID", stored.paymentStatus().name());
+        org.junit.jupiter.api.Assertions.assertNull(stored.exitTime());
+        mockMvc.perform(post("/internal/parking/sessions/{sessionId}/discount", sessionId)
+                        .header("X-Internal-Service-Token", "parkflow-local-internal-token-change-me").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"totalEligibleInvoiceAmount\":1,\"discountAmount\":5001}"))
+                .andExpect(status().isBadRequest());
+    }
+
     private JsonNode createSession() throws Exception {
         MvcResult result = checkIn(nextPlate(), staffToken()).andExpect(status().isCreated()).andReturn();
         return objectMapper.readTree(result.getResponse().getContentAsString());

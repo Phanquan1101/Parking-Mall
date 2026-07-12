@@ -78,11 +78,11 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-0701 | Draft merchant validation schema | P0 | Tenant, staff profile, validation, and discount tables documented | TODO |
-| T-0702 | Draft invoice validation endpoint | P0 | Authorized tenant and online-only official validation enforced | TODO |
-| T-0703 | Enforce one invoice one use | P0 | Duplicate invoice code rejected and logged | TODO |
-| T-0704 | Implement aggregate policy contract | P0 | Multiple invoices reach threshold under `AGGREGATE_INVOICE` | TODO |
-| T-0705 | Document discount recalculation | P0 | Final fee never becomes negative | TODO |
+| T-0701 | Implement merchant validation model | P0 | In-memory tenant and invoice validation model exists | DONE |
+| T-0702 | Implement invoice validation endpoint | P0 | Authorized online merchant/admin validation enforced | DONE |
+| T-0703 | Enforce one invoice one use | P0 | Duplicate invoice code rejected | DONE |
+| T-0704 | Implement aggregate policy | P0 | Multiple invoices aggregate under `AGGREGATE_INVOICE` | DONE |
+| T-0705 | Implement discount recalculation | P0 | Final fee cannot become negative or exceed fee discount | DONE |
 
 ## Slice 8 - Payment Reconciliation
 

@@ -5,6 +5,8 @@ E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-ser
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\dto\CheckOutResponse.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\dto\ExitPassResponse.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\dto\GenerateExitPassRequest.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\dto\InternalDiscountUpdateRequest.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\dto\InternalDiscountUpdateResponse.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\dto\InternalPaymentUpdateRequest.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\dto\InternalPaymentUpdateResponse.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\dto\ManualOverrideRequest.java
@@ -22,6 +24,7 @@ E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-ser
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\exception\ExitPassExceptionHandler.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\model\ExitPass.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\model\ExitPassStatus.java
+E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\model\MerchantDiscountState.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\model\OfflineEvent.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\model\OfflineEventType.java
 E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\src\main\java\com\parkflow\mall\parking\model\OfflineSyncStatus.java

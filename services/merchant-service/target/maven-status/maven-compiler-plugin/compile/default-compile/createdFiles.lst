@@ -1,1 +1,14 @@
+com\parkflow\mall\merchant\config\SecurityConfig.class
+com\parkflow\mall\merchant\repository\InMemoryInvoiceValidationRepository.class
+com\parkflow\mall\merchant\security\JwtAuthenticationFilter.class
+com\parkflow\mall\merchant\dto\ValidateInvoiceRequest.class
+com\parkflow\mall\merchant\dto\InvoiceValidationResponse.class
 com\parkflow\mall\merchant\MerchantServiceApplication.class
+com\parkflow\mall\merchant\config\MerchantConfig.class
+com\parkflow\mall\merchant\model\InvoiceValidation.class
+com\parkflow\mall\merchant\repository\InvoiceValidationRepository.class
+com\parkflow\mall\merchant\dto\ValidationHistoryResponse.class
+com\parkflow\mall\merchant\security\MerchantUser.class
+com\parkflow\mall\merchant\model\InvoiceValidationStatus.class
+com\parkflow\mall\merchant\service\MerchantValidationService.class
+com\parkflow\mall\merchant\controller\MerchantValidationController.class

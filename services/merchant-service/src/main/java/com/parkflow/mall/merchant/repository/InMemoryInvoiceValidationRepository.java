@@ -1,0 +1,3 @@
+package com.parkflow.mall.merchant.repository;
+import com.parkflow.mall.merchant.model.InvoiceValidation; import java.util.*; import java.util.concurrent.ConcurrentHashMap; import org.springframework.stereotype.Repository;
+@Repository public class InMemoryInvoiceValidationRepository implements InvoiceValidationRepository { private final Map<String,InvoiceValidation> byCode=new ConcurrentHashMap<>(); public boolean existsByInvoiceCode(String code){return byCode.containsKey(code);} public void save(InvoiceValidation v){byCode.put(v.invoiceCode(),v);} public List<InvoiceValidation> findBySessionId(String id){return byCode.values().stream().filter(v->v.sessionId().equals(id)).toList();} }

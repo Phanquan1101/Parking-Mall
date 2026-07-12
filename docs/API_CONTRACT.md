@@ -197,6 +197,12 @@ Payment simulation, webhook, reconciliation, and order creation where retryable 
 
 `AGGREGATE_INVOICE` is the default policy. One invoice code is single-use and official validation requires online mode.
 
+### Slice 7 implemented merchant validation
+
+`POST /api/merchant/validations` requires `MERCHANT_STAFF` or `ADMIN` JWT, a QR Lookup Token, unique invoice code, and positive amount. The service resolves the parking ticket online, rejects exited sessions and duplicate codes, aggregates accepted invoices, then calls Parking's internal-only `POST /internal/parking/sessions/{sessionId}/discount` endpoint. The internal endpoint requires `X-Internal-Service-Token`, recalculates final fee, and is not Gateway-routed.
+
+The demo policy is `AGGREGATE_INVOICE`: at total eligible amount `300000`, apply `5000` discount, capped at the parking estimated fee. `GET /api/merchant/validations?sessionId=` returns validation history. Official offline validation is not implemented.
+
 ## 9. Reservation
 
 | Method | Path | Role | Purpose |

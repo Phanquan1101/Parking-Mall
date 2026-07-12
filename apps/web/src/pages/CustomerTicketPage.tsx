@@ -188,11 +188,16 @@ function TicketSummary({ ticket, order, paymentError, paymentBusy, exitPass, exi
               <dt>Discount amount</dt>
               <dd>{currencyFormatter.format(ticket.discountAmount)}</dd>
             </div>
+            <div>
+              <dt>Eligible merchant invoices</dt>
+              <dd>{currencyFormatter.format(ticket.totalEligibleInvoiceAmount)}</dd>
+            </div>
             <div className="fee-total">
               <dt>Final fee</dt>
               <dd>{currencyFormatter.format(ticket.finalFee)}</dd>
             </div>
           </dl>
+          <p className="payment-complete">{ticket.merchantDiscountMessage}</p>
         </section>
 
         <section className="ticket-section" aria-labelledby="security-notice">

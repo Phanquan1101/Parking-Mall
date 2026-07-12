@@ -121,6 +121,15 @@ Every vertical slice must include:
 | TC-S6-GATE-001 | Gateway sync and status routes | Authorization and idempotency header are forwarded | Implemented |
 | TC-S6-WEB-001 | Offline Staff Console | Local queue, connection state, and build verified | Implemented |
 
+### Slice 7 implementation coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-S7-MER-001 | Online merchant/admin validation | JWT tenant mapping and invoice validation endpoint available | Automated |
+| TC-S7-MER-002 | Duplicate invoice code | Globally rejected as `DUPLICATE_INVOICE` | Automated |
+| TC-S7-MER-003 | Aggregate threshold | `300000` aggregate applies `5000` discount capped at fee | Automated |
+| TC-S7-PARK-001 | Internal merchant discount update | Updates public ticket invoice total, discount, and final fee | Automated |
+
 ## 5. Payment tests
 
 | Test ID | Scenario | Expected Result | Priority |

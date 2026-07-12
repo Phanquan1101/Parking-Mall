@@ -15,6 +15,8 @@ import com.parkflow.mall.parking.dto.ManualOverrideRequest;
 import com.parkflow.mall.parking.dto.OfflineEventStatusResponse;
 import com.parkflow.mall.parking.dto.OfflineSyncRequest;
 import com.parkflow.mall.parking.dto.OfflineSyncResponse;
+import com.parkflow.mall.parking.dto.InternalDiscountUpdateRequest;
+import com.parkflow.mall.parking.dto.InternalDiscountUpdateResponse;
 import com.parkflow.mall.parking.security.AuthenticatedUser;
 import com.parkflow.mall.parking.service.ParkingSessionService;
 import java.util.List;
@@ -113,5 +115,11 @@ public class ParkingSessionController {
     public InternalPaymentUpdateResponse updatePayment(@PathVariable String sessionId, @RequestHeader("X-Internal-Service-Token") String token, @RequestBody InternalPaymentUpdateRequest request) {
         if (!internalServiceToken.equals(token)) { throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid internal service token"); }
         return parkingSessionService.updatePaymentStatus(sessionId, request);
+    }
+
+    @PostMapping("/internal/parking/sessions/{sessionId}/discount")
+    public InternalDiscountUpdateResponse updateDiscount(@PathVariable String sessionId, @RequestHeader("X-Internal-Service-Token") String token, @RequestBody InternalDiscountUpdateRequest request) {
+        if (!internalServiceToken.equals(token)) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid internal service token");
+        return parkingSessionService.updateMerchantDiscount(sessionId, request);
     }
 }

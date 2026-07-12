@@ -55,6 +55,20 @@ services:
     ports:
       - "${FULLSTACK_PAYMENT_HOST_PORT:-18083}:8083"
 
+  merchant-service:
+    build:
+      context: ./services/merchant-service
+    profiles: [full-stack]
+    environment:
+      MERCHANT_SERVICE_PORT: 8084
+      PARKING_SERVICE_BASE_URL: http://parking-service:8082
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-parkflow-local-internal-token-change-me}
+      JWT_SECRET: ${JWT_SECRET:-parkflow-local-development-secret-change-me-2026}
+      MERCHANT_DISCOUNT_THRESHOLD: ${MERCHANT_DISCOUNT_THRESHOLD:-300000}
+      MERCHANT_DISCOUNT_AMOUNT: ${MERCHANT_DISCOUNT_AMOUNT:-5000}
+    ports:
+      - "${FULLSTACK_MERCHANT_HOST_PORT:-18084}:8084"
+
   api-gateway:
     build:
       context: ./services/api-gateway
@@ -68,11 +82,14 @@ services:
         condition: service_started
       payment-service:
         condition: service_started
+      merchant-service:
+        condition: service_started
     environment:
       API_GATEWAY_PORT: 8080
       IDENTITY_SERVICE_BASE_URL: http://identity-service:8081
       PARKING_SERVICE_BASE_URL: http://parking-service:8082
       PAYMENT_SERVICE_BASE_URL: http://payment-service:8083
+      MERCHANT_SERVICE_BASE_URL: http://merchant-service:8084
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
     ports:
       - "${FULLSTACK_API_GATEWAY_HOST_PORT:-18080}:8080"

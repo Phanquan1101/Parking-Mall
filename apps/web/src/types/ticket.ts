@@ -10,6 +10,9 @@ export type PublicTicket = {
   estimatedFee: number;
   discountAmount: number;
   finalFee: number;
+  totalEligibleInvoiceAmount: number;
+  discountPolicy: string;
+  merchantDiscountMessage: string;
   canGenerateExitPass: boolean;
   exitPassAvailable: boolean;
   exitPassMessage: string;
