@@ -15,4 +15,6 @@ public interface ParkingSessionRepository {
     Optional<ParkingSession> findByLookupToken(String lookupToken);
 
     List<ParkingSession> search(ParkingSessionStatus status, String normalizedPlate);
+
+    void update(ParkingSession session);
 }

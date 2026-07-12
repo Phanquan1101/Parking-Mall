@@ -149,6 +149,35 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: A parameterized browser route keeps QR ticket links shareable while the environment variable supports local gateway configuration without embedding deployment URLs in frontend code.
 - Consequences: `/tickets/:lookupToken` is public, fetches only the public ticket endpoint, and must never surface lookup-token metadata or exit authorization controls.
 
+## ADR-022
+
+- Status: Accepted
+- Decision: Slice 4 stores payment orders and idempotency results in memory behind repository interfaces.
+- Rationale: This proves the simulation lifecycle before a payment database schema or migration is approved.
+- Consequences: Payment data is reset on service restart and must be replaced with persistent storage later.
+
+## ADR-023
+
+- Status: Accepted
+- Decision: Payment Service calls Parking's internal PAID-update endpoint using `X-Internal-Service-Token`.
+- Rationale: The cross-service update must not be exposed through the public gateway.
+- Consequences: Payment and Parking require the same local internal-token configuration.
+
+## ADR-024
+
+- Status: Accepted
+- Decision: Use `PARKING_DEMO_FLAT_FEE=5000` until a fee engine is implemented.
+- Rationale: Payment simulation needs a non-zero amount without introducing dynamic pricing or discounts.
+- Consequences: The fee is a configurable demo-only value, not a parking pricing rule.
+
+## ADR-025
+
+- Title: Separate Hybrid Local and Full Docker host ports
+- Status: Accepted
+- Decision: Direct local backend uses `8080`–`8090`; Full Docker publishes `18080`–`18090`; infrastructure uses the `infra` profile; the full backend uses the `full-stack` profile. Internal container ports remain unchanged.
+- Rationale: Prevent host-port conflicts, support IntelliJ debugging, and preserve full container testing.
+- Consequences: Frontend API base URL differs by mode, documentation must clearly state the active mode, and Docker service-to-service URLs use internal Compose names.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

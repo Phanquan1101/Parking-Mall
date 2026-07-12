@@ -78,6 +78,17 @@ Every vertical slice must include:
 | TC-S3-WEB-006 | Customer views ticket security notice | UI states that QR Lookup cannot authorize vehicle exit | Implemented |
 | TC-S3-WEB-007 | Customer ticket page data exposure | No `staffId`, raw lookup token, audit data, or security internals are rendered | Implemented |
 
+### Slice 4 implemented coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-S4-PAY-001 | Create payment order with valid ticket | Pending order uses the configured demo fee | Implemented |
+| TC-S4-PAY-002 | Simulation without `Idempotency-Key` | Request is rejected | Implemented |
+| TC-S4-PAY-003 | Simulation retry with same key | Existing order result is returned without double-processing | Implemented |
+| TC-S4-PAY-004 | Code or amount mismatch | Order becomes `MISMATCHED`; Parking is not paid | Implemented |
+| TC-S4-PAY-005 | Internal payment update | Valid internal token marks session `PAID`; invalid token is rejected | Implemented |
+| TC-S4-PAY-006 | Customer ticket after simulation | Public ticket shows `PAID`; no Exit Pass is displayed | Implemented |
+
 ## 5. Payment tests
 
 | Test ID | Scenario | Expected Result | Priority |

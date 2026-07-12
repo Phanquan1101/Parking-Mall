@@ -1,6 +1,7 @@
 com\parkflow\mall\parking\dto\CheckInRequest.class
 com\parkflow\mall\parking\model\ParkingSessionStatus.class
 com\parkflow\mall\parking\service\ParkingSessionEventRecorder.class
+com\parkflow\mall\parking\dto\InternalPaymentUpdateResponse.class
 com\parkflow\mall\parking\dto\PublicTicketResponse.class
 com\parkflow\mall\parking\config\SecurityConfig.class
 com\parkflow\mall\parking\model\VehicleType.class
@@ -16,5 +17,6 @@ com\parkflow\mall\parking\security\JwtVerifier.class
 com\parkflow\mall\parking\model\Role.class
 com\parkflow\mall\parking\dto\ParkingSessionResponse.class
 com\parkflow\mall\parking\repository\ParkingSessionRepository.class
+com\parkflow\mall\parking\dto\InternalPaymentUpdateRequest.class
 com\parkflow\mall\parking\repository\InMemoryParkingSessionRepository.class
 com\parkflow\mall\parking\model\ParkingSessionEvent.class

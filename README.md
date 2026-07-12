@@ -4,9 +4,9 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
-Slice 3 - Customer Ticket Page is complete. Customers can open a public QR Lookup link to view a safe parking-session and fee summary without logging in. Payment, exit authorization, and all later parking features remain unimplemented.
+Slice 4 - Payment Simulation is complete. Customers can create an in-memory payment order from the public ticket page and simulate payment success; Parking then reflects `PAID`. No real money is used and SePay Live is disabled.
 
-Next slice: Slice 4 - Payment Simulation.
+Next slice: Slice 5 - Dynamic Exit Pass + Check-out.
 
 ## Tech stack
 
@@ -40,6 +40,46 @@ tests/                        Future cross-service test areas
 
 Copy `.env.example` to `.env` and set only local, non-production values when later slices need them. Slice 0 does not connect to Supabase, SePay, or OCR providers.
 
+## Local Development Modes
+
+### Mode A — Hybrid Local Development (recommended)
+
+Infrastructure runs in Docker while Spring Boot services run from IntelliJ IDEA and the React/Vite app runs from VS Code. Start PostgreSQL only:
+
+```powershell
+docker compose --profile infra up -d
+```
+
+Run these services directly in IntelliJ: api-gateway on `8080`, identity-service on `8081`, parking-service on `8082`, and payment-service on `8083`. Future merchant, reservation, and reporting services use `8084`, `8085`, and `8086`; Vision/OCR may use `8090`.
+
+Run the frontend from VS Code:
+
+```powershell
+cd apps/web
+npm install
+npm run dev
+```
+
+Access the frontend at `http://localhost:5173`, gateway at `http://localhost:8080`, and PostgreSQL at `localhost:5432`. In this mode, service-to-service URLs use `http://localhost:8081`, `http://localhost:8082`, and `http://localhost:8083`, and persistence uses `jdbc:postgresql://localhost:5432/parkflow` when enabled.
+
+### Mode B — Full Docker Stack (optional)
+
+Stop IntelliJ backend services, or leave them running because Docker publishes a separate host-port range. Start the full backend stack with:
+
+```powershell
+docker compose --profile full-stack up --build
+```
+
+Access the Docker gateway at `http://localhost:18080`, identity at `http://localhost:18081`, parking at `http://localhost:18082`, and payment at `http://localhost:18083`. Set `VITE_API_BASE_URL=http://localhost:18080` in an uncommitted `apps/web/.env.local` when using the Docker backend. Stop it with:
+
+```powershell
+docker compose --profile full-stack down
+```
+
+Docker services communicate through internal names such as `http://parking-service:8082`. Do not point a locally running IntelliJ service to Docker hostnames; use `localhost` URLs instead.
+
+Plain `docker compose up` starts no profiled services. Use the explicit `infra` or `full-stack` command above.
+
 Run one Java service, for example:
 
 ```powershell
@@ -63,6 +103,11 @@ mvn spring-boot:run
 
 ```powershell
 cd services/parking-service
+mvn spring-boot:run
+```
+
+```powershell
+cd services/payment-service
 mvn spring-boot:run
 ```
 
@@ -114,6 +159,8 @@ Manual Slice 3 demo flow:
 3. Copy `qrLookupToken` from the check-in response.
 4. Open `http://localhost:5173/tickets/<qrLookupToken>`.
 5. Confirm the summary renders and an invalid token shows the safe not-found message.
+
+For Slice 4, create a payment order on that ticket page, simulate success, and confirm the ticket changes to `PAID`. Simulation Mode uses no real money; SePay Live remains disabled.
 
 Run the vision placeholder:
 

@@ -1,38 +1,81 @@
 name: parkflow-mall
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    profiles: [infra, full-stack]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-parkflow}
+      POSTGRES_USER: ${POSTGRES_USER:-parkflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-parkflow-local-password}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - parkflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-parkflow} -d ${POSTGRES_DB:-parkflow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   identity-service:
     build:
       context: ./services/identity-service
+    profiles: [full-stack]
     environment:
       IDENTITY_SERVICE_PORT: 8081
       JWT_SECRET: ${JWT_SECRET:-parkflow-local-development-secret-change-me-2026}
       JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-3600}
     ports:
-      - "${IDENTITY_SERVICE_PORT:-8081}:8081"
-
-  api-gateway:
-    build:
-      context: ./services/api-gateway
-    depends_on:
-      - identity-service
-      - parking-service
-    environment:
-      API_GATEWAY_PORT: 8080
-      IDENTITY_SERVICE_BASE_URL: http://identity-service:8081
-      PARKING_SERVICE_BASE_URL: http://parking-service:8082
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
-    ports:
-      - "${API_GATEWAY_PORT:-8080}:8080"
+      - "${FULLSTACK_IDENTITY_HOST_PORT:-18081}:8081"
 
   parking-service:
     build:
       context: ./services/parking-service
+    profiles: [full-stack]
     environment:
       PARKING_SERVICE_PORT: 8082
       JWT_SECRET: ${JWT_SECRET:-parkflow-local-development-secret-change-me-2026}
-      PUBLIC_BASE_URL: http://localhost:${API_GATEWAY_PORT:-8080}
+      PUBLIC_BASE_URL: http://localhost:${FULLSTACK_API_GATEWAY_HOST_PORT:-18080}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-parkflow-local-internal-token-change-me}
+      PARKING_DEMO_FLAT_FEE: ${PARKING_DEMO_FLAT_FEE:-5000}
     ports:
-      - "${PARKING_SERVICE_PORT:-8082}:8082"
+      - "${FULLSTACK_PARKING_HOST_PORT:-18082}:8082"
 
-# Slice 2 contains no database, Supabase, SePay, OCR model, or other domain services.
+  payment-service:
+    build:
+      context: ./services/payment-service
+    profiles: [full-stack]
+    environment:
+      PAYMENT_SERVICE_PORT: 8083
+      PAYMENT_MODE: ${PAYMENT_MODE:-SIMULATION}
+      PAYMENT_ORDER_TTL_MINUTES: ${PAYMENT_ORDER_TTL_MINUTES:-15}
+      PARKING_SERVICE_BASE_URL: http://parking-service:8082
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-parkflow-local-internal-token-change-me}
+    ports:
+      - "${FULLSTACK_PAYMENT_HOST_PORT:-18083}:8083"
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+    profiles: [full-stack]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity-service:
+        condition: service_started
+      parking-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+    environment:
+      API_GATEWAY_PORT: 8080
+      IDENTITY_SERVICE_BASE_URL: http://identity-service:8081
+      PARKING_SERVICE_BASE_URL: http://parking-service:8082
+      PAYMENT_SERVICE_BASE_URL: http://payment-service:8083
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+    ports:
+      - "${FULLSTACK_API_GATEWAY_HOST_PORT:-18080}:8080"
+
+volumes:
+  parkflow-postgres-data:

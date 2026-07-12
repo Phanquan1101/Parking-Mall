@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getPublicTicket, TicketApiError } from "../api/ticketApi";
 import type { PublicTicket } from "../types/ticket";
+import { createPaymentOrder, simulatePayment, type PaymentOrder } from "../api/paymentApi";
 
 type TicketState = "loading" | "success" | "invalid" | "error";
 
@@ -35,6 +36,9 @@ export function CustomerTicketPage() {
   const [ticket, setTicket] = useState<PublicTicket | null>(null);
   const [state, setState] = useState<TicketState>(lookupToken ? "loading" : "invalid");
   const [retryKey, setRetryKey] = useState(0);
+  const [order, setOrder] = useState<PaymentOrder | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentBusy, setPaymentBusy] = useState(false);
 
   useEffect(() => {
     let isCurrent = true;
@@ -83,7 +87,7 @@ export function CustomerTicketPage() {
         {state === "loading" && <LoadingTicket />}
         {state === "invalid" && <InvalidTicket />}
         {state === "error" && <ErrorTicket onRetry={() => setRetryKey((key) => key + 1)} />}
-        {state === "success" && ticket && <TicketSummary ticket={ticket} />}
+        {state === "success" && ticket && <TicketSummary ticket={ticket} lookupToken={lookupToken!} order={order} paymentError={paymentError} paymentBusy={paymentBusy} onCreate={async()=>{setPaymentBusy(true);setPaymentError(null);try{setOrder(await createPaymentOrder(ticket,lookupToken!));}catch{setPaymentError("Unable to create payment order. Please try again.");}finally{setPaymentBusy(false);}}} onSimulate={async()=>{if(!order)return;setPaymentBusy(true);setPaymentError(null);try{await simulatePayment(order);setRetryKey(key=>key+1);}catch{setPaymentError("Unable to simulate payment. Please verify the order and try again.");}finally{setPaymentBusy(false);}}} />}
       </main>
     </div>
   );
@@ -123,7 +127,7 @@ function ErrorTicket({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-function TicketSummary({ ticket }: { ticket: PublicTicket }) {
+function TicketSummary({ ticket, order, paymentError, paymentBusy, onCreate, onSimulate }: { ticket: PublicTicket; lookupToken: string; order: PaymentOrder | null; paymentError: string | null; paymentBusy: boolean; onCreate: () => Promise<void>; onSimulate: () => Promise<void> }) {
   return (
     <>
       <section className="ticket-intro">
@@ -193,6 +197,8 @@ function TicketSummary({ ticket }: { ticket: PublicTicket }) {
             <p>QR Lookup is for ticket lookup only. It cannot authorize vehicle exit.</p>
           </div>
         </section>
+        {ticket.paymentStatus !== "PAID" && <section className="ticket-section" aria-labelledby="payment-simulation"><h2 className="section-heading" id="payment-simulation">Payment simulation</h2>{!order ? <button className="primary-button" disabled={paymentBusy} onClick={onCreate}>{paymentBusy ? "Creating order..." : "Create Payment Order"}</button> : <div className="payment-demo"><p><strong>Payment code:</strong> {order.paymentCode}</p><p><strong>Amount:</strong> {currencyFormatter.format(order.amount)}</p><p>Simulation Mode only. No real money is used.</p><button className="primary-button" disabled={paymentBusy} onClick={onSimulate}>{paymentBusy ? "Processing..." : "Simulate Payment Success"}</button></div>}{paymentError && <p className="payment-error">{paymentError}</p>}</section>}
+        {ticket.paymentStatus === "PAID" && <section className="ticket-section"><p className="payment-complete">Payment completed. Exit Pass will be available in a later slice.</p></section>}
       </article>
     </>
   );

@@ -15,6 +15,9 @@ public record ParkingSession(
         String staffId,
         PlateSource plateSource,
         String qrLookupToken,
+        String paymentOrderId,
+        Long amountPaid,
+        Instant paidAt,
         Instant createdAt,
         Instant updatedAt) {
 }

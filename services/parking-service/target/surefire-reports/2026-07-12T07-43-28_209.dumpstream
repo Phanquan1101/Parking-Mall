@@ -1,0 +1,5 @@
+# Created at 2026-07-12T07:43:28.403
+Boot Manifest-JAR contains absolute paths in classpath 'E:\PROJECT_QUAN\MANAGE_PARKING_PROJECT_2026\Parking-Backend\services\parking-service\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+

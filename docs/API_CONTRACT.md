@@ -130,9 +130,9 @@ Check-in and check-out mutations accept `Idempotency-Key`.
 | POST | `/api/parking/sessions/{sessionId}/exit-passes` | Public lookup context, `PARKING_STAFF`, `ADMIN` | Create a pass only for `PAID` or zero-fee session |
 | POST | `/api/parking/exit-passes/{exitPassToken}/validate` | `PARKING_STAFF`, `ADMIN` | Validate pass before gate decision |
 
-### Slice 2 public ticket lookup
+### Slice 4 public ticket lookup
 
-`GET /api/public/tickets/{lookupToken}` is public. It returns session and parking status, fee fields set to zero, and the statement that the lookup token cannot authorize exit. It never exposes `staffId`, internal events, or token metadata. Invalid tokens return `404`.
+`GET /api/public/tickets/{lookupToken}` is public. It returns session and parking status, a temporary configurable demo flat fee, and the statement that the lookup token cannot authorize exit. It never exposes `staffId`, internal events, or token metadata. Invalid tokens return `404`.
 
 Exit authorization requires all of the following:
 
@@ -162,6 +162,12 @@ The `POST` request requires an `Idempotency-Key` header. Each event also contain
 | POST | `/api/payments/reconciliation/run` | `ADMIN`, scheduler, internal service | Reconcile pending/mismatched payment states |
 
 Payment simulation, webhook, reconciliation, and order creation where retryable require `Idempotency-Key`. Payment must match `payment_code` and amount. `SEPAY_LIVE` is not an allowed MVP mode.
+
+### Slice 4 implemented payment simulation
+
+`POST /api/payments/orders` and `GET /api/payments/orders/{paymentOrderId}` are public only in the possession context of a valid ticket lookup token or order ID. `POST /api/payments/simulations/success` is enabled only when `PAYMENT_MODE=SIMULATION` and requires `Idempotency-Key`; retries return the previously processed order result. The simulation matches payment code and amount before updating Parking.
+
+`POST /internal/parking/sessions/{sessionId}/payment-status` is Parking-Service-internal only, requires `X-Internal-Service-Token`, and is intentionally not routed by API Gateway. It accepts only `PAID` updates and never creates an Exit Pass.
 
 ## 8. Merchant validation
 

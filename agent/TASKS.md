@@ -47,11 +47,11 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-0401 | Draft payment order schema | P0 | Order, transaction, webhook, and idempotency fields documented | TODO |
-| T-0402 | Draft payment order endpoint | P0 | `/api/payments/orders` is documented | TODO |
-| T-0403 | Draft simulation success endpoint | P0 | `/api/payments/simulations/success` uses `Idempotency-Key` | TODO |
-| T-0404 | Document amount/code matching | P0 | Mismatch becomes `MISMATCHED` or review state | TODO |
-| T-0405 | Document payment audit events | P0 | Payment state changes are auditable | TODO |
+| T-0401 | Implement payment order schema | P0 | In-memory order, transaction model, and idempotency state exist | DONE |
+| T-0402 | Implement payment order endpoint | P0 | `/api/payments/orders` creates an order for a valid lookup token | DONE |
+| T-0403 | Implement simulation success endpoint | P0 | `/api/payments/simulations/success` requires `Idempotency-Key` | DONE |
+| T-0404 | Implement amount/code matching | P0 | Mismatch becomes `MISMATCHED` and cannot pay Parking | DONE |
+| T-0405 | Record payment update event | P0 | Parking records payment confirmation event | DONE |
 
 ## Slice 5 - Dynamic Exit Pass + Check-out
 

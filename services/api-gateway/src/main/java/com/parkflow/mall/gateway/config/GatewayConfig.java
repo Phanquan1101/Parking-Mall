@@ -28,7 +28,7 @@ public class GatewayConfig {
                 registry.addMapping("/api/**")
                         .allowedOrigins(origins.toArray(String[]::new))
                         .allowedMethods("GET", "POST", "OPTIONS")
-                        .allowedHeaders("Authorization", "Content-Type")
+                        .allowedHeaders("Authorization", "Content-Type", "Idempotency-Key")
                         .maxAge(3600);
             }
         };

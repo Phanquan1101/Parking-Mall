@@ -1,0 +1,3 @@
+package com.parkflow.mall.payment.dto;
+import com.parkflow.mall.payment.model.*; import java.time.Instant;
+public final class PaymentDtos { private PaymentDtos(){} public record CreateOrderRequest(PaymentTargetType targetType,String targetId,String lookupToken){} public record OrderResponse(String paymentOrderId,PaymentTargetType targetType,String targetId,String paymentCode,long amount,String currency,PaymentStatus status,Instant expiresAt,Instant paidAt,boolean simulationMode){} public record SimulateRequest(String paymentOrderId,String paymentCode,long amount){} public record SimulationResponse(String paymentOrderId,PaymentStatus status,Instant paidAt,PaymentTargetType targetType,String targetId,String parkingUpdateStatus){} }

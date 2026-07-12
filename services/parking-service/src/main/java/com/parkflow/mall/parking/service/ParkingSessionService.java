@@ -3,6 +3,8 @@ package com.parkflow.mall.parking.service;
 import com.parkflow.mall.parking.dto.CheckInRequest;
 import com.parkflow.mall.parking.dto.ParkingSessionResponse;
 import com.parkflow.mall.parking.dto.PublicTicketResponse;
+import com.parkflow.mall.parking.dto.InternalPaymentUpdateRequest;
+import com.parkflow.mall.parking.dto.InternalPaymentUpdateResponse;
 import com.parkflow.mall.parking.model.ParkingSession;
 import com.parkflow.mall.parking.model.ParkingSessionEvent;
 import com.parkflow.mall.parking.model.ParkingSessionStatus;
@@ -31,15 +33,18 @@ public class ParkingSessionService {
     private final ParkingSessionRepository repository;
     private final ParkingSessionEventRecorder eventRecorder;
     private final String publicTicketBaseUrl;
+    private final long demoFlatFee;
     private final AtomicLong sequence = new AtomicLong();
 
     public ParkingSessionService(
             ParkingSessionRepository repository,
             ParkingSessionEventRecorder eventRecorder,
-            @Value("${app.public-ticket-base-url}") String publicTicketBaseUrl) {
+            @Value("${app.public-ticket-base-url}") String publicTicketBaseUrl,
+            @Value("${app.demo-flat-fee:5000}") long demoFlatFee) {
         this.repository = repository;
         this.eventRecorder = eventRecorder;
         this.publicTicketBaseUrl = publicTicketBaseUrl.replaceAll("/$", "");
+        this.demoFlatFee = demoFlatFee;
     }
 
     public ParkingSessionResponse checkIn(CheckInRequest request, AuthenticatedUser actor) {
@@ -72,6 +77,7 @@ public class ParkingSessionService {
                 actor.id(),
                 PlateSource.MANUAL,
                 nextLookupToken(),
+                null, null, null,
                 now,
                 now);
 
@@ -105,10 +111,29 @@ public class ParkingSessionService {
                 session.paymentStatus(),
                 session.entryTime(),
                 duration,
+                demoFlatFee,
                 0,
-                0,
-                0,
+                demoFlatFee,
                 "QR Lookup Token is for ticket lookup only and cannot authorize exit.");
+    }
+
+    public InternalPaymentUpdateResponse updatePaymentStatus(String sessionId, InternalPaymentUpdateRequest request) {
+        if (request == null || request.paymentStatus() != PaymentStatus.PAID || request.paymentOrderId() == null || request.paymentOrderId().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Slice 4 accepts only PAID payment updates");
+        }
+        ParkingSession session = findSessionById(sessionId);
+        if (session.paymentStatus() == PaymentStatus.PAID) {
+            if (request.paymentOrderId().equals(session.paymentOrderId())) {
+                return new InternalPaymentUpdateResponse(sessionId, PaymentStatus.PAID, session.amountPaid(), true);
+            }
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Session is already paid by another order");
+        }
+        ParkingSession updated = new ParkingSession(session.id(), session.sessionCode(), session.vehiclePlate(), session.normalizedPlate(),
+                session.vehicleType(), session.status(), PaymentStatus.PAID, session.entryTime(), session.entryGate(), session.staffId(),
+                session.plateSource(), session.qrLookupToken(), request.paymentOrderId(), request.amountPaid(), request.paidAt(), session.createdAt(), Instant.now());
+        repository.update(updated);
+        eventRecorder.record(new ParkingSessionEvent("PAYMENT_CONFIRMED", sessionId, "payment-service", Instant.now()));
+        return new InternalPaymentUpdateResponse(sessionId, PaymentStatus.PAID, request.amountPaid(), true);
     }
 
     public static String normalizePlate(String plate) {

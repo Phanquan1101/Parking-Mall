@@ -50,4 +50,7 @@ public class InMemoryParkingSessionRepository implements ParkingSessionRepositor
                 .sorted(Comparator.comparing(ParkingSession::entryTime).reversed())
                 .toList();
     }
+
+    @Override
+    public void update(ParkingSession session) { sessionsById.put(session.id(), session); }
 }
