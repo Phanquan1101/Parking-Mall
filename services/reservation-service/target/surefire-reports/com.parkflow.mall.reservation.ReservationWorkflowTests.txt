@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.parkflow.mall.reservation.ReservationWorkflowTests
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.983 s -- in com.parkflow.mall.reservation.ReservationWorkflowTests
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.722 s -- in com.parkflow.mall.reservation.ReservationWorkflowTests

@@ -3,16 +3,23 @@ import hashlib
 import hmac
 import json
 import os
-import re
 import uuid
 from datetime import datetime, timezone
 
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
+from app.ocr_providers import (
+    STAFF_CONFIRMATION_WARNING,
+    OcrProviderConfigurationError,
+    OcrProviderUnavailableError,
+    create_ocr_provider,
+)
 
-app = FastAPI(title="ParkFlow Mall Vision Service", version="0.0.1")
+app = FastAPI(title="ParkFlow Mall Vision Service", version="0.0.2")
 JWT_SECRET = os.getenv("JWT_SECRET", "parkflow-local-development-secret-change-me-2026")
 LOW_CONFIDENCE_THRESHOLD = float(os.getenv("OCR_LOW_CONFIDENCE_THRESHOLD", "0.75"))
 SUPPORTED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
+DEFAULT_PROVIDER = "DEMO_OCR"
+DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 
 
 def _decode_segment(segment: str) -> bytes:
@@ -44,16 +51,6 @@ def _require_staff_token(authorization: str | None) -> None:
         raise HTTPException(status_code=401, detail="Invalid access token")
 
 
-def _demo_candidate(filename: str | None) -> tuple[str | None, float]:
-    # Filename parsing is deterministic for the demo; image bytes are never persisted.
-    stem = (filename or "").upper()
-    match = re.search(r"([0-9]{2}[A-Z][0-9][- ]?[0-9]{4,5})", stem)
-    if not match:
-        return None, 0.2
-    candidate = match.group(1).replace(" ", "")
-    return candidate, 0.82
-
-
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "UP", "service": "vision-service"}
@@ -71,16 +68,34 @@ async def ocr_plate(
         raise HTTPException(status_code=400, detail="image is required")
     if image.content_type not in SUPPORTED_CONTENT_TYPES:
         raise HTTPException(status_code=400, detail="Unsupported image content type")
-    candidate, confidence = _demo_candidate(image.filename)
-    warnings = ["Staff confirmation is required before check-in."]
-    if candidate is None or confidence < LOW_CONFIDENCE_THRESHOLD:
+    try:
+        provider = create_ocr_provider(
+            os.getenv("VISION_OCR_PROVIDER", DEFAULT_PROVIDER),
+            os.getenv("GEMINI_API_KEY", ""),
+            os.getenv("GEMINI_MODEL", DEFAULT_GEMINI_MODEL),
+        )
+    except OcrProviderConfigurationError:
+        raise HTTPException(status_code=503, detail="OCR provider configuration is unavailable")
+
+    image_bytes = await image.read()
+    try:
+        result = provider.recognize(image_bytes, image.content_type, image.filename)
+    except OcrProviderConfigurationError:
+        raise HTTPException(status_code=503, detail="OCR provider configuration is unavailable")
+    except OcrProviderUnavailableError:
+        raise HTTPException(status_code=502, detail="OCR provider is unavailable; enter the plate manually")
+    finally:
+        del image_bytes
+
+    warnings = [STAFF_CONFIRMATION_WARNING, *result.warnings]
+    if result.candidate_plate is None or result.confidence < LOW_CONFIDENCE_THRESHOLD:
         warnings.append("OCR confidence is low; enter or correct the plate manually.")
     return {
         "ocrRequestId": str(uuid.uuid4()),
-        "candidatePlate": candidate,
-        "normalizedCandidatePlate": re.sub(r"[^A-Z0-9]", "", candidate) if candidate else None,
-        "confidence": confidence,
-        "provider": "DEMO_OCR",
+        "candidatePlate": result.candidate_plate,
+        "normalizedCandidatePlate": result.normalized_candidate_plate,
+        "confidence": result.confidence,
+        "provider": result.provider,
         "warnings": warnings,
         "createdAt": datetime.now(timezone.utc).isoformat(),
     }

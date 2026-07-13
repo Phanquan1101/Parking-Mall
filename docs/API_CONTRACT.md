@@ -226,11 +226,33 @@ Slice 9 statuses are `RESERVED`, `CANCELLED`, `EXPIRED`, and `CONSUMED`. Interna
 
 | Method | Path | Role | Purpose |
 |---|---|---|---|
-| POST | `/api/vision/ocr/plate` | `PARKING_STAFF`, `ADMIN` | Multipart image upload returning a demo candidate and confidence |
+| POST | `/api/vision/ocr/plate` | `PARKING_STAFF`, `ADMIN` | Multipart image upload returning an assistive plate candidate and confidence |
 
-`POST /api/vision/ocr/plate` accepts multipart field `image` (JPEG, PNG, or WebP) plus optional `cameraId`/`gateId`. It returns `ocrRequestId`, `candidatePlate`, `normalizedCandidatePlate`, `confidence` (0–1), `provider`, warnings, and `createdAt`. The route requires `ADMIN` or `PARKING_STAFF`; `MERCHANT_STAFF` is denied.
+`POST /api/vision/ocr/plate` accepts multipart field `image` (JPEG, PNG, or WebP) plus optional `cameraId`/`gateId`. It returns `ocrRequestId`, nullable `candidatePlate` and `normalizedCandidatePlate`, clamped `confidence` (0–1), `provider`, warnings, and `createdAt`. The route requires `ADMIN` or `PARKING_STAFF`; `MERCHANT_STAFF` is denied. Missing images and unsupported image types return `400`.
+
+Vision selects `DEMO_OCR` or `GEMINI` only from its backend `VISION_OCR_PROVIDER` environment variable. `GEMINI` requires a server-side `GEMINI_API_KEY`; a missing/invalid provider configuration returns safe `503` detail and an unavailable configured provider returns safe `502` detail so the staff console can fall back to manual entry. No provider API key or uploaded image data is returned to the frontend. Every response includes `Staff confirmation is required before check-in.`; a missing, uncertain, or low-confidence candidate includes a manual-entry warning.
+
+Example response:
+
+```json
+{
+  "ocrRequestId": "2ffcd5a9-f6f8-4f5d-a2fd-7fd3094b75c6",
+  "candidatePlate": "59A1-12345",
+  "normalizedCandidatePlate": "59A112345",
+  "confidence": 0.86,
+  "provider": "GEMINI",
+  "warnings": ["Staff confirmation is required before check-in."],
+  "createdAt": "2026-07-12T00:00:00+00:00"
+}
+```
 
 Parking check-in accepts optional `ocrRequestId`, `ocrCandidatePlate`, and `ocrConfidence` when `plateSource` is `OCR_ASSISTED`. `vehiclePlate` remains the confirmed staff value and source of truth. OCR is assistive only: it does not auto-create a session, bypass duplicate/reservation validation, authorize exit, or change payment/merchant/Exit Pass/check-out behavior.
+
+Slice 10C uses these unchanged Vision and Parking contracts from the frontend `/staff/gate-entry` route. The camera page submits a transient JPEG frame only while scanning, and only one recognition request is active at a time. A successful normal check-in response already exposes `sessionCode`, `vehiclePlate`, `entryTime`, `paymentStatus`, `qrLookupToken`, and `ticketUrl`; the frontend builds the customer route as `/tickets/{qrLookupToken}`. The Lookup Ticket remains view-only and is never an Exit Pass.
+
+### Slice 11A dashboard usage
+
+`GET /api/parking/sessions` and `GET /api/reservations` remain `ADMIN`/`PARKING_STAFF` protected and are consumed directly by the read-only frontend dashboard. Parking session list responses include stored `reservationId`, `reservationCode`, `plateSource`, and OCR metadata. `GET /api/payments/reconciliation/items` remains `ADMIN` only; clients must gracefully handle 403 for staff users.
 
 ## 11. Reports and dashboard
 

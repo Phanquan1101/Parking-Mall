@@ -278,6 +278,29 @@ Every test should retain the baseline happy-path, invalid-input, unauthorized-ro
 | TC-OCR-009 | OCR-assisted parking check-in | Staff-confirmed plate is authoritative; OCR metadata is stored; payment remains `UNPAID` | Automated |
 | TC-OCR-010 | OCR duplicate-plate regression | OCR-assisted check-in still rejects active duplicate plate | Automated |
 | TC-OCR-011 | Vision Gateway multipart route | Authorization and multipart image forward; internal Vision route remains hidden | Automated |
+| TC-OCR-012 | Gemini provider mocked success | Mocked strict JSON produces normalized candidate, bounded confidence, provider name, and mandatory confirmation warning | Automated |
+| TC-OCR-013 | Gemini no-plate/invalid JSON | Nullable candidate, low confidence, and manual-entry warning are returned safely | Automated |
+| TC-OCR-014 | Gemini configuration and isolation | Missing API key returns safe configuration error; tests make no network/Gemini call | Automated |
+| TC-OCR-015 | Vision input and roles regression | Missing/unsupported image is rejected; ADMIN/PARKING_STAFF allowed and MERCHANT_STAFF denied | Automated |
+| TC-OCR-016 | Live Gate Entry route build | `/staff/gate-entry` compiles with existing routes intact | Automated build coverage |
+| TC-OCR-017 | Live camera scan state machine | Camera start/stop, cooldown, one in-flight OCR request, low-confidence retry, and candidate lock are manually verified | Manual demo |
+| TC-OCR-018 | Gate Entry confirmation and ticket | Staff can edit a locked plate, Enter/click creates normal OCR-assisted check-in, and customer Lookup Ticket is displayed with no exit authorization | Manual demo |
+| TC-OCR-019 | Gate Entry security/privacy | Camera frames are transient, scanning pauses for confirmation/QR, and unauthorized OCR/check-in remains denied by backend | Manual demo + regression |
+| TC-OCR-020 | Same-plate cooldown | A recently locked normalized plate is not locked again until cooldown expiry or explicit clear; Parking remains source of truth | Manual demo |
+| TC-OCR-021 | Gate Entry duplicate submit guard | Double-click/Enter spam while `CHECKING_IN` emits one check-in request; QR-ready ignores further submit | Manual demo |
+| TC-OCR-022 | Gate Entry retry and camera failure handling | Low confidence retries quietly; timeout/network backs off; auth/provider errors stop scanning; camera deny/disconnect is actionable | Manual demo |
+| TC-OCR-023 | Gate Entry manual fallback | Manual plate entry submits `plateSource=MANUAL` with no OCR metadata and still uses ordinary Parking validation | Manual demo |
+| TC-OCR-024 | Gate Entry next-vehicle reset | Ticket, candidate, OCR state, and errors clear; an active camera resumes scanning without clearing cooldown implicitly | Manual demo |
+
+## 17. Slice 11A automated dashboard coverage
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-DASH-001 | Dashboard web build and route | `/dashboard` compiles with existing routes intact | Automated |
+| TC-DASH-002 | Parking client-side metrics | Active, unpaid, paid-not-exited, OCR, and reservation-session counts are derived from list data | Automated build coverage |
+| TC-DASH-003 | Reservation client-side metrics | Reserved, cancelled, expired, and consumed counts are derived from list data | Automated build coverage |
+| TC-DASH-004 | Reconciliation authorization fallback | 403 renders the ADMIN-only message while parking/reservation sections remain available | Automated build coverage |
+| TC-DASH-005 | Service regression | Existing identity, gateway, parking, payment, merchant, reservation, and vision checks remain green | Automated |
 
 ## 14. Canonical scenario checklist
 

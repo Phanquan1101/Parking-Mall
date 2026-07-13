@@ -90,6 +90,9 @@ services:
     profiles: [full-stack]
     environment:
       JWT_SECRET: ${JWT_SECRET:-parkflow-local-development-secret-change-me-2026}
+      VISION_OCR_PROVIDER: ${VISION_OCR_PROVIDER:-DEMO_OCR}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
       OCR_LOW_CONFIDENCE_THRESHOLD: ${OCR_LOW_CONFIDENCE_THRESHOLD:-0.75}
     ports:
       - "${FULLSTACK_VISION_HOST_PORT:-18090}:8090"

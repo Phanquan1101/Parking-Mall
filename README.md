@@ -4,9 +4,15 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
-Slice 10 - OCR Assist is complete. Staff can upload a plate image, review the demo OCR candidate, then confirm or edit the plate before normal check-in.
+Slice 11A - Read-only Operational Dashboard is complete. Staff/admin can use an existing JWT to view client-side summaries of parking sessions and reservations; reconciliation details remain ADMIN-only.
 
-Next slice: Slice 11 - Dashboard.
+Next slice: Slice 11B - Dashboard Polish and Demo Readiness.
+
+Slice 10B - Real Gemini OCR Provider is complete. Vision Service selects `DEMO_OCR` (the default filename-based fallback) or `GEMINI` through `VISION_OCR_PROVIDER`. To use Gemini, set `GEMINI_API_KEY` and optionally `GEMINI_MODEL=gemini-2.5-flash` only in the Vision Service environment. The browser never receives the API key; all Gemini calls stay server-side. OCR remains a suggestion that staff must confirm or correct before a normal check-in.
+
+Slice 10C - Live Camera Gate Entry is complete. `/staff/gate-entry` keeps a browser camera preview open, sends throttled transient frames to the existing Vision endpoint, then pauses on a confident plate suggestion for staff confirmation. For real camera recognition use `VISION_OCR_PROVIDER=GEMINI` with a server-side `GEMINI_API_KEY`; `DEMO_OCR` remains useful for the filename/mock upload flow.
+
+Slice 10D - Gate Entry Stability is complete. The camera flow has a local 15-second same-plate cooldown, single-submit check-in guard, capped OCR retry backoff, camera disconnect handling, and a manual check-in fallback. These are UX safeguards only: Parking Service remains the final duplicate-active-plate authority.
 
 Slice 8 admin demo: log in as `admin`, then call `POST /api/payments/reconciliation/run` and inspect `GET /api/payments/reconciliation/items`. Reconciliation is in-memory only; it uses no SePay or real banking and never refunds, creates an Exit Pass, or checks out a vehicle.
 
@@ -14,7 +20,13 @@ Merchant demo: open `http://localhost:5173/merchant/validate`, paste a Merchant/
 
 Reservation demo: open `http://localhost:5173/reservations/new`, create a reservation, and copy its opaque code. A staff user includes `reservationCode` in the normal parking check-in request. Parking consumes the reservation over its internal service route, then creates a normal `UNPAID` Parking Session. Slice 9 has no reservation payment or deposit.
 
-OCR demo: open `http://localhost:5173/staff/ocr-checkin`, paste a staff/admin JWT, upload a JPEG/PNG/WebP image, review the candidate, then confirm or correct the plate before submitting check-in. OCR never auto-creates a session or authorizes a gate; images are not stored.
+OCR demo: open `http://localhost:5173/staff/ocr-checkin`, paste a staff/admin JWT, upload a JPEG/PNG/WebP image, review the provider and candidate, then confirm or correct the plate before submitting check-in. OCR never auto-creates a session or authorizes a gate; images are not stored.
+
+Live Gate Entry demo: start Identity, Gateway, Parking, Vision, and Web; configure Vision with `DEMO_OCR` for filename/mock testing or `GEMINI` plus `GEMINI_API_KEY` for real camera images. Log in as `staff`, open `http://localhost:5173/staff/gate-entry`, paste the JWT, start the camera, point a plate at the guide, review or edit the locked candidate, and press Enter to confirm check-in. Show the generated customer ticket link, then select **Next Vehicle** to resume scanning. Staff confirmation remains required; the displayed QR Lookup Ticket never authorizes exit.
+
+Gate Entry stability notes: use a real or clearly printed plate and keep it steady inside the guide until the candidate locks; press Enter only once after reviewing it. If the same plate remains in view after **Next Vehicle**, the local cooldown explains why it is not locked again; use **Clear cooldown** only for an intentional override. Use **Nhập biển số thủ công** when camera/OCR is unavailable. If the browser blocks the camera, grant camera permission and restart it; if Vision reports configuration unavailable, verify the server-side Gemini configuration. Camera frames are never stored.
+
+Dashboard demo: log in as `admin` or `staff`, open `http://localhost:5173/dashboard`, paste the JWT, then refresh. The dashboard is read-only and aggregates existing parking/reservation APIs in the browser. Payment reconciliation details load only for `ADMIN`; staff see an ADMIN-only notice.
 
 ## Tech stack
 

@@ -253,6 +253,34 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: This validates OCR-assist integration without GPU dependencies, paid providers, permanent image storage, camera streaming, or hardware integration.
 - Consequences: The confirmed staff plate remains authoritative. OCR can never auto-create a session, bypass reservation/duplicate validation, or alter payment, merchant, Exit Pass, checkout, offline, or reconciliation behavior.
 
+## ADR-037
+
+- Status: Accepted
+- Decision: Slice 11A is a read-only frontend dashboard that aggregates existing Parking, Reservation, and Payment Reconciliation responses in the browser.
+- Rationale: It provides operational demo visibility without adding reporting persistence, aggregation jobs, realtime delivery, exports, or new business rules.
+- Consequences: Reconciliation details remain ADMIN-only; staff receive a section-level access message. Dashboard values are limited to currently loaded in-memory service data.
+
+## ADR-038
+
+- Status: Accepted
+- Decision: Add a backend-only Gemini OCR provider behind the Vision Service, selected by `VISION_OCR_PROVIDER`; retain deterministic `DEMO_OCR` as the default local/no-key provider.
+- Rationale: Gemini can improve uploaded vehicle-plate recognition while a provider boundary keeps Parking independent of the AI engine and allows deterministic, offline tests.
+- Consequences: `GEMINI_API_KEY` is read only by Vision Service and is never exposed to the frontend. Gemini output remains assistive, is normalized and confidence-clamped, and always requires staff confirmation before normal check-in. No image persistence, provider test network calls, or Parking rule changes are introduced.
+
+## ADR-039
+
+- Status: Accepted
+- Decision: Implement Slice 10C Live Gate Entry as a frontend-driven browser-camera workflow using the existing Vision OCR and Parking check-in APIs.
+- Rationale: Browser camera access and a throttled client-side state machine demonstrate entry-gate flow without a new streaming service, RTSP integration, or Parking-domain change.
+- Consequences: Frames are transient, never persisted, and are sent only while `SCANNING` with one OCR request in flight. A candidate pauses scanning for mandatory staff confirmation; Vision remains the AI boundary and Parking remains independent of Gemini. The customer QR Lookup Ticket is displayed after normal check-in and never acts as an Exit Pass.
+
+## ADR-040
+
+- Status: Accepted
+- Decision: Use frontend-only same-plate cooldown, request suppression, capped OCR retry backoff, and manual entry fallback to stabilize Slice 10D Gate Entry.
+- Rationale: These controls reduce operator noise and accidental duplicate submissions without assigning security or business authority to the browser.
+- Consequences: The cooldown is transient UX state and can be explicitly cleared by staff. Parking Service's active-plate validation remains the source of truth. Manual fallback calls the unchanged normal check-in API with `plateSource=MANUAL`; no images are persisted and no Gemini key reaches the frontend.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

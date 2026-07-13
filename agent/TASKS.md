@@ -112,15 +112,18 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 | T-1002 | Implement staff confirmation/correction flow | P0 | OCR candidate can be edited before normal check-in | DONE |
 | T-1003 | Preserve manual OCR fallback | P0 | OCR failure never blocks manual check-in | DONE |
 | T-1004 | Add plate correction audit criteria | P1 | Corrections are logged | TODO |
+| T-1005 | Add backend Gemini OCR provider | P1 | `DEMO_OCR` remains default; backend-only Gemini is configurable and mocked in tests | DONE |
+| T-1006 | Implement Live Camera Gate Entry | P1 | Browser camera, throttled OCR assist, staff confirmation, and customer Lookup Ticket handoff work without Parking rule changes | DONE |
+| T-1007 | Harden Gate Entry stability | P1 | Cooldown, single-submit guard, backoff, camera recovery, manual fallback, and safe reset work without changing Parking rules | DONE |
 
 ## Slice 11 - Dashboard
 
 | Task ID | Task | Priority | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| T-1101 | Draft dashboard summary contract | P0 | Active sessions and confirmed revenue are separated from pending data | TODO |
-| T-1102 | Add payment state cards | P0 | Pending/mismatched/reconciliation states visible | TODO |
-| T-1103 | Add merchant and offline cards | P0 | Validation totals, pending sync, and conflicts visible | TODO |
-| T-1104 | Add suspicious/fraud view | P0 | Suspicious cases and alerts are visible to Admin | TODO |
+| T-1101 | Implement Slice 11A read-only dashboard | P0 | Client-side Parking and Reservation summaries render from existing APIs | DONE |
+| T-1102 | Add payment state cards | P0 | Active/unpaid/paid-not-exited and ADMIN reconciliation visibility render | DONE |
+| T-1103 | Add merchant and offline cards | P0 | Deferred: no listable source exists in Slice 11A | TODO |
+| T-1104 | Add suspicious/fraud view | P0 | Deferred to a later dashboard slice | TODO |
 
 ## Slice 12 - Docker + Deploy Hardening
 

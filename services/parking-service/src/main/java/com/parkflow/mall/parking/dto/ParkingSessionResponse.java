@@ -22,5 +22,6 @@ public record ParkingSessionResponse(
         String ocrRequestId,
         String ocrCandidatePlate,
         Double ocrConfidence,
+        com.parkflow.mall.parking.model.PlateSource plateSource,
         String ticketUrl) {
 }

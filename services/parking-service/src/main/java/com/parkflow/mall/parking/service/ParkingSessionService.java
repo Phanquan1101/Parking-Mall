@@ -465,7 +465,7 @@ public class ParkingSessionService {
 
     private ParkingSessionResponse toStaffResponse(ParkingSession session) {
         return new ParkingSessionResponse(session.id(), session.sessionCode(), session.vehiclePlate(), session.normalizedPlate(), session.vehicleType(),
-                session.status(), session.paymentStatus(), session.entryTime(), session.entryGate(), session.qrLookupToken(), session.reservationId(), session.reservationCode(), session.reservationId() != null, session.ocrRequestId(), session.ocrCandidatePlate(), session.ocrConfidence(),
+                session.status(), session.paymentStatus(), session.entryTime(), session.entryGate(), session.qrLookupToken(), session.reservationId(), session.reservationCode(), session.reservationId() != null, session.ocrRequestId(), session.ocrCandidatePlate(), session.ocrConfidence(), session.plateSource(),
                 publicTicketBaseUrl + "/api/public/tickets/" + session.qrLookupToken());
     }
 
