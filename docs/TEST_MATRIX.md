@@ -336,3 +336,30 @@ Every test should retain the baseline happy-path, invalid-input, unauthorized-ro
 | TC-UI-023 | Offline queue view | Connection state, pending/synced/conflict/rejected counts, event table, and sync warning remain clear | Manual visual verification |
 | TC-UI-024 | OCR upload view | File selection, OCR candidate/provider/confidence, warnings, and staff-confirmed check-in are visually distinct | Manual visual verification |
 | TC-UI-025 | Responsive staff surfaces | Gate, dashboard, offline, and OCR layouts retain readable controls and horizontally scrollable tables at narrow widths | Manual visual verification |
+
+## 20. UI-03 customer, reservation, and merchant visual verification
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-UI-030 | Web production build | TypeScript and Vite production build completes | Automated |
+| TC-UI-031 | Public homepage | Product entry, capability summary, demo routes, and QR Lookup security explanation render clearly | Manual visual verification |
+| TC-UI-032 | Customer ticket mobile view | Vehicle, status, fee/discount, payment simulation, and Exit Pass sections remain readable and unchanged in behavior | Manual visual verification |
+| TC-UI-033 | Reservation create and detail | Form, success code, status card, cancellation reason/control, and staff check-in instruction render clearly | Manual visual verification |
+| TC-UI-034 | Merchant validation | JWT guidance, invoice form, aggregate-policy explanation, accepted result, and duplicate-invoice error are clear | Manual visual verification |
+| TC-UI-035 | QR/Exit Pass regression | QR Lookup warning remains clear; payment and Exit Pass eligibility/API flow remain unchanged | Manual visual verification |
+
+## 21. UI-04 final demo flow visual QA
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-UI-040 | Full route smoke test | All public, customer, staff, merchant, offline, OCR, and dashboard routes compile and render without blank pages | Automated build + manual verification |
+| TC-UI-041 | Demo flow coherence | Homepage checklist supports Reservation → Gate Entry → Customer Ticket → Merchant → Payment → Exit Pass → Dashboard journey | Manual visual verification |
+| TC-UI-042 | Customer ticket mobile QA | Ticket identity, fees, QR Lookup warning, payment, Exit Pass, and copy controls remain usable at 390px width | Manual visual verification |
+| TC-UI-043 | Staff console QA | Gate status, large confirmed plate, QR handoff, dashboard states, offline queue, and OCR confirmation are easy to scan | Manual visual verification |
+| TC-UI-044 | Error and empty states | Missing/invalid JWT, ticket/reservation not found, API errors, empty data, camera/OCR failures, and duplicate plate feedback remain readable | Manual visual verification |
+| TC-UI-045 | Responsive QA | Public routes remain mobile-friendly; staff tables scroll and controls remain usable at tablet/laptop widths | Manual visual verification |
+| TC-UI-046 | Web production build | TypeScript and Vite production build completes | Automated |
+
+## 22. UAT and demo reference
+
+Manual acceptance coverage is maintained in [UAT_CHECKLIST.md](UAT_CHECKLIST.md). The active Run 1 execution sheet is [UAT_EXECUTION_RUN_1.md](UAT_EXECUTION_RUN_1.md). The 10–15 minute end-to-end presentation flow and fallback plan are maintained in [DEMO_SCRIPT.md](DEMO_SCRIPT.md).

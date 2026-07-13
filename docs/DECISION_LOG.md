@@ -295,6 +295,20 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: Operators need to read camera state, OCR assistance, confirmation, queue state, and partial dashboard access at a glance during a graduation demonstration.
 - Consequences: This is frontend presentation only. No backend/API, role, request payload, camera/OCR state-machine, payment, reservation, offline-sync, or checkout behavior changes.
 
+## ADR-043
+
+- Status: Accepted
+- Decision: UI-03 polishes customer, reservation, and merchant routes as a frontend-only presentation layer.
+- Rationale: The public demo flow needs clear mobile ticket information, reservation handoff, invoice validation feedback, and explicit QR-security messaging without changing service behavior.
+- Consequences: Customer Ticket remains QR Lookup only and is never an Exit Pass. Payment, Exit Pass eligibility, reservation lifecycle, merchant aggregation, API payloads, and backend logic remain unchanged.
+
+## ADR-044
+
+- Status: Accepted
+- Decision: UI-04 performs final frontend-only demo-flow polish and visual QA, prioritizing the graduation-presentation sequence.
+- Rationale: A consistent journey from reservation through Gate Entry, ticket, merchant discount, payment, Exit Pass, dashboard, and offline mode makes the approved MVP easier to demonstrate safely.
+- Consequences: No backend/API contracts, authentication, payment, Exit Pass, reservation, merchant, OCR, offline, dashboard-data, checkout, persistence, Supabase, or SePay behavior changes.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

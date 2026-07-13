@@ -4,6 +4,12 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
+UI-04 - Final Demo Flow Polish and Visual QA is complete. The frontend now presents a coherent graduation-demo route from homepage through reservation, Gate Entry, customer QR ticket, merchant discount, payment simulation, Exit Pass, dashboard, and optional Offline Staff mode. Shared status labels, alerts, copy controls, responsive spacing, and QR/Exit Pass security messaging are presentation-only improvements; no API or business behavior changed.
+
+Recommended demo script: **Homepage → Reservation → Gate Entry → Customer Ticket → Merchant Validation → Payment Simulation → Exit Pass → Dashboard → Offline Staff**. Use `/staff/gate-entry` as the primary live console, then validate/check-out through Postman or backend APIs where no staff UI exists.
+
+UI-03 - Customer, Reservation, Merchant Pages Deep Polish is complete. The homepage, customer ticket, reservation create/detail, and merchant invoice validation pages now use clearer Vietnamese copy, mobile-friendly cards/forms, status feedback, and safe token/code presentation. Recommended demo flow: open the homepage, create a reservation, check in through Gate Entry, open the customer ticket, validate merchant invoices, simulate payment, then generate an Exit Pass.
+
 UI-02 - Staff Operations Pages Deep Polish is complete. `/staff/gate-entry` is now the primary live-demo console, with clearer camera, recognition, manual-fallback, confirmation, and customer QR-result areas. `/dashboard`, `/staff/offline`, and `/staff/ocr-checkin` have more readable operational status, tables, empty states, and responsive layouts. This is visual-only work: existing JWT entry, API requests, camera/OCR behavior, and business rules are unchanged.
 
 UI-01 - Frontend Design System and App Shell Revamp is complete. The React app now uses a lightweight custom design system, responsive staff/admin AppShell navigation, and a separate customer-facing public shell. Existing API calls and all established routes remain unchanged: `/`, `/tickets/:lookupToken`, `/reservations/new`, `/reservations/:reservationCode`, `/merchant/validate`, `/staff/offline`, `/staff/ocr-checkin`, `/staff/gate-entry`, and `/dashboard`.
@@ -212,6 +218,12 @@ uvicorn app.main:app --reload --port 8090
 ```
 
 ## Documentation source of truth
+
+## UAT and Demo
+
+- [UAT Checklist](docs/UAT_CHECKLIST.md) — 99 ca kiểm thử chấp nhận thủ công, bao gồm UI và Postman/API.
+- [UAT Execution Run 1](docs/UAT_EXECUTION_RUN_1.md) — execution sheet đang dùng để tester ghi kết quả, evidence và bug note cho Run 1.
+- [Demo Script](docs/DEMO_SCRIPT.md) — kịch bản trình bày end-to-end trong 10–15 phút.
 
 Read `AGENTS.md` first, then consult:
 

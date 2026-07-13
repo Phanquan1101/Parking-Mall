@@ -149,3 +149,19 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 | UI-0201 | Polish Gate Entry console | P1 | Camera state, OCR assistance, manual fallback, confirmation, and QR handoff remain clear without changing scan behavior | DONE |
 | UI-0202 | Polish operations dashboard | P1 | Metrics, table statuses, empty states, and partial ADMIN reconciliation access are visually clear | DONE |
 | UI-0203 | Polish Offline Staff and OCR Upload | P1 | Queue summaries, sync state, OCR upload/result, and confirmed check-in forms retain existing behavior with clearer presentation | DONE |
+
+## UI-03 - Customer, Reservation, Merchant Pages Deep Polish
+
+| Task ID | Task | Priority | Acceptance Criteria | Status |
+|---|---|---|---|---|
+| UI-0301 | Polish customer home and ticket | P1 | Homepage and mobile ticket make QR Lookup, payment simulation, discount, and Exit Pass boundaries clear without behavior changes | DONE |
+| UI-0302 | Polish reservation create and detail | P1 | Reservation form, success code, detail status, cancellation control, and staff handoff remain route/API compatible | DONE |
+| UI-0303 | Polish merchant validation | P1 | Merchant JWT guidance, invoice form, aggregate policy, result, and error presentation retain existing validation behavior | DONE |
+
+## UI-04 - Final Demo Flow Polish and Visual QA
+
+| Task ID | Task | Priority | Acceptance Criteria | Status |
+|---|---|---|---|---|
+| UI-0401 | Align final demo flow | P1 | Homepage supports the approved Reservation → Gate → Ticket → Merchant → Payment → Exit Pass → Dashboard story without new behavior | DONE |
+| UI-0402 | Final consistency and responsive QA | P1 | Shared labels, badges, alerts, copy controls, spacing, mobile ticket, and staff table fallbacks are consistent | DONE |
+| UI-0403 | Final build and visual-QA documentation | P1 | Web build passes and manual smoke/error/responsive checks are recorded | DONE |

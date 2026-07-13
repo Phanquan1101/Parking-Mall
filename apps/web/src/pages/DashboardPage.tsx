@@ -76,8 +76,8 @@ export function DashboardPage() {
       </Table>
     </DataSection>
 
-    <DataSection title="Payment reconciliation" meta={reconciliationNote || `Open ${metrics.openReconciliationItems} · Resolved ${metrics.resolvedReconciliationItems} · Manual review ${metrics.pendingManualReviewItems}`}>
-      {reconciliationNote ? <Alert tone="warning">{reconciliationNote}</Alert> : <Table headers={["Mã item", "Payment order", "Đối tượng", "Vấn đề", "Trạng thái", "Lần thử", "Cập nhật"]}>
+    <DataSection title="Đối soát thanh toán" meta={reconciliationNote || `Đang mở ${metrics.openReconciliationItems} · Đã xử lý ${metrics.resolvedReconciliationItems} · Chờ kiểm tra ${metrics.pendingManualReviewItems}`}>
+      {reconciliationNote ? <Alert tone="warning">{reconciliationNote}</Alert> : <Table headers={["Mã item", "Lệnh thanh toán", "Đối tượng", "Vấn đề", "Trạng thái", "Lần thử", "Cập nhật"]}>
         {reconciliation.length === 0 ? <EmptyRow columns={7} title="Không có reconciliation item" description="Các item cần đối soát sẽ hiển thị tại đây cho ADMIN." /> : reconciliation.slice(0, 20).map(item => <tr key={item.id}>
           <td><code>{item.id}</code></td><td><code>{item.paymentOrderId}</code></td><td><code>{item.targetId}</code></td><td><span className="issue-label">{item.issueType}</span></td><td><StatusBadge status={item.status} /></td><td>{dashIfEmpty(item.attemptCount)}</td><td>{formatDateTime(item.updatedAt)}</td>
         </tr>)}
