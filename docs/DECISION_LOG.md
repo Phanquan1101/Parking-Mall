@@ -288,6 +288,13 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: The existing Vite frontend needs a consistent, responsive demo-ready experience without adding a heavyweight UI dependency or changing any backend/API behavior.
 - Consequences: Shared color, spacing, form, table, badge, and focus styles are maintained in the frontend only. Existing route paths, JWT entry, requests, response handling, camera state machine, and business rules remain unchanged.
 
+## ADR-042
+
+- Status: Accepted
+- Decision: UI-02 optimizes staff operation pages for demo clarity, with `/staff/gate-entry` as the primary live-demo console.
+- Rationale: Operators need to read camera state, OCR assistance, confirmation, queue state, and partial dashboard access at a glance during a graduation demonstration.
+- Consequences: This is frontend presentation only. No backend/API, role, request payload, camera/OCR state-machine, payment, reservation, offline-sync, or checkout behavior changes.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

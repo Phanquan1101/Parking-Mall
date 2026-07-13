@@ -325,3 +325,14 @@ Every test should retain the baseline happy-path, invalid-input, unauthorized-ro
 | TC-UI-004 | Core operations pages | Dashboard, gate-entry, OCR upload, offline queue, and merchant validation load within the shared shell | Manual visual verification |
 | TC-UI-005 | Customer and reservation pages | Ticket and reservation routes retain their existing behavior and responsive public layout | Manual visual verification |
 | TC-UI-006 | Responsive/accessibility baseline | Keyboard focus is visible, labels remain associated with controls, and data tables scroll on narrow screens | Manual visual verification |
+
+## 19. UI-02 staff operations visual verification
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-UI-020 | Web production build | TypeScript and Vite production build completes | Automated |
+| TC-UI-021 | Gate Entry console | Camera preview, scan status, recognition data, manual fallback, confirmation form, and QR result are clearly visible without changing camera behavior | Manual visual verification |
+| TC-UI-022 | Dashboard operations view | Metric cards, badges, readable tables, empty states, and ADMIN-only reconciliation messaging render correctly | Manual visual verification |
+| TC-UI-023 | Offline queue view | Connection state, pending/synced/conflict/rejected counts, event table, and sync warning remain clear | Manual visual verification |
+| TC-UI-024 | OCR upload view | File selection, OCR candidate/provider/confidence, warnings, and staff-confirmed check-in are visually distinct | Manual visual verification |
+| TC-UI-025 | Responsive staff surfaces | Gate, dashboard, offline, and OCR layouts retain readable controls and horizontally scrollable tables at narrow widths | Manual visual verification |

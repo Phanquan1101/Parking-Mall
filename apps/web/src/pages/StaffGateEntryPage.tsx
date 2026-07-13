@@ -299,31 +299,36 @@ export function StaffGateEntryPage() {
   const ticketUrl = session?.qrLookupToken ? customerTicketUrl(session.qrLookupToken) : session?.ticketUrl;
   const isCameraRunning = streamRef.current !== null;
   const canConfirm = Boolean(state === "PLATE_READY" && confirmedPlate.trim() && (mode === "MANUAL" || ocr !== null));
+  const modeLabel = state === "QR_READY" ? "QR sẵn sàng" : mode === "MANUAL" ? "Nhập thủ công" : "Camera";
+  const cameraStatus = state === "CAMERA_IDLE" ? "Camera chưa bật" : state === "SCANNING" ? "Đang quét" : state === "RECOGNIZING" ? "Đang nhận diện" : state === "PLATE_READY" ? "Đã nhận diện" : state === "ERROR" ? "Lỗi camera" : state === "QR_READY" ? "Đã cấp QR" : "Đang khởi tạo";
 
   return <main className="gate-entry-layout">
     <section className="gate-entry-heading">
-      <div><span className="ticket-code">Staff gate entry</span><h1>Live camera check-in</h1><p>OCR only suggests a plate. Staff must confirm it before a normal parking session is created.</p></div>
-      <span className={`gate-state gate-state--${state.toLowerCase()}`}>{mode === "MANUAL" ? "Nhập biển số thủ công" : stateCopy[state]}</span>
+      <div><span className="ticket-code">GATE_IN_01 · vận hành trực tiếp</span><h1>Cổng vào thông minh</h1><p>Quét biển số, xác nhận và cấp QR ticket cho khách. OCR chỉ hỗ trợ; nhân viên luôn quyết định biển số check-in.</p></div>
+      <div className="gate-header-status"><span className="gate-id">Cổng vào · {entryGate}</span><span className={`gate-state gate-state--${state.toLowerCase()}`}>{modeLabel} · {cameraStatus}</span></div>
     </section>
 
     <section className="gate-entry-grid">
       <div className="camera-station">
-        <div className="camera-preview" aria-label="Live vehicle plate camera preview"><video ref={videoRef} autoPlay muted playsInline /><div className="plate-guide" aria-hidden="true"><span>Plate guide</span></div>{!isCameraRunning && <div className="camera-empty"><strong>Camera preview</strong><span>Start the camera to begin live plate recognition.</span></div>}</div>
-        <div className="camera-actions"><button type="button" className="primary-button" onClick={() => void startCamera()} disabled={state === "CAMERA_STARTING" || state === "CHECKING_IN"}>Start Camera</button><button type="button" className="secondary-button" onClick={stopCamera} disabled={!isCameraRunning}>Stop Camera</button>{mode === "CAMERA" && state === "PLATE_READY" && <button type="button" className="secondary-button" onClick={scanAgain}>Scan Again</button>}<button type="button" className="secondary-button" onClick={clearCooldown}>Clear cooldown</button></div>
-        <p className="camera-privacy">Frames are transient, used only for the current OCR request, and never stored.</p>
+        <div className="console-heading"><div><h2>Camera Console</h2><p>Đưa biển số vào khung quét và giữ ổn định trong 1–2 giây.</p></div><span className={`console-status console-status--${state.toLowerCase()}`}>{cameraStatus}</span></div>
+        <div className="camera-preview" aria-label="Live vehicle plate camera preview"><video ref={videoRef} autoPlay muted playsInline /><div className="plate-guide" aria-hidden="true"><span>Vùng quét biển số</span></div>{!isCameraRunning && <div className="camera-empty"><strong>Camera chưa bật</strong><span>Bắt đầu camera để quét biển số trực tiếp tại cổng vào.</span></div>}</div>
+        <div className="camera-actions"><button type="button" className="primary-button" onClick={() => void startCamera()} disabled={state === "CAMERA_STARTING" || state === "CHECKING_IN"}>Bắt đầu camera</button><button type="button" className="secondary-button" onClick={stopCamera} disabled={!isCameraRunning}>Dừng camera</button>{mode === "CAMERA" && state === "PLATE_READY" && <button type="button" className="secondary-button" onClick={scanAgain}>Quét lại</button>}<button type="button" className="secondary-button" onClick={clearCooldown}>Xóa cooldown</button></div>
+        <div className="operator-guidance"><span>1. Đưa biển số vào khung quét</span><span>2. Nhấn Enter khi biển số đã đúng</span><span>3. Sau QR, chọn Xe tiếp theo</span></div>
+        <p className="camera-privacy">Khung hình chỉ dùng cho yêu cầu OCR hiện tại và không được lưu lại.</p>
       </div>
 
       <div className="gate-control">
-        <label>Staff JWT<textarea value={token} onChange={(event) => setToken(event.target.value)} rows={3} placeholder="Paste PARKING_STAFF or ADMIN JWT" /></label>
-        <div className="manual-mode-actions">{mode === "MANUAL" ? <button type="button" className="secondary-button" onClick={() => resetForScan(false)}>Quay lại quét camera</button> : <button type="button" className="secondary-button" onClick={activateManualFallback}>Nhập biển số thủ công</button>}</div>
+        <div className="recognition-summary"><div><span>Chế độ hiện tại</span><strong>{modeLabel}</strong></div><div><span>Trạng thái OCR</span><strong>{cameraStatus}</strong></div>{ocr && <><div><span>Nhà cung cấp</span><strong>{ocr.provider}</strong></div><div><span>Độ tin cậy</span><strong>{(ocr.confidence * 100).toFixed(0)}%</strong></div></>}</div>
+        <label>JWT nhân viên<textarea value={token} onChange={(event) => setToken(event.target.value)} rows={2} placeholder="Dán PARKING_STAFF hoặc ADMIN JWT" /></label>
+        <div className="manual-mode-actions">{mode === "MANUAL" ? <div className="manual-mode-note"><span>Camera/OCR đang tạm dừng.</span><button type="button" className="secondary-button" onClick={() => resetForScan(false)}>Quay lại quét camera</button></div> : <button type="button" className="secondary-button" onClick={activateManualFallback}>Nhập biển số thủ công</button>}</div>
         <form onSubmit={(event) => void confirmCheckIn(event)}>
           <fieldset disabled={state === "CHECKING_IN" || state === "QR_READY"}>
-            <legend>{mode === "MANUAL" ? "Check-in thủ công" : "Confirm check-in"}</legend>
-            <label>Confirmed plate<input value={confirmedPlate} onChange={(event) => setConfirmedPlate(event.target.value)} placeholder={mode === "MANUAL" ? "Nhập biển số" : "Waiting for a plate candidate"} required /></label>
-            <div className="gate-fields"><label>Vehicle type<select value={vehicleType} onChange={(event) => setVehicleType(event.target.value as "MOTORBIKE" | "CAR")}><option value="MOTORBIKE">Motorbike</option><option value="CAR">Car</option></select></label><label>Entry gate<input value={entryGate} onChange={(event) => setEntryGate(event.target.value)} required /></label></div>
-            <label>Reservation code <span>(optional)</span><input value={reservationCode} onChange={(event) => setReservationCode(event.target.value)} /></label>
-            {ocr && mode === "CAMERA" && <div className="ocr-readout"><p><strong>{ocr.provider}</strong> · {(ocr.confidence * 100).toFixed(0)}% confidence</p><p>OCR candidate: <strong>{ocr.candidatePlate ?? "No candidate"}</strong></p>{ocr.warnings.map((warning) => <p key={warning}>{warning}</p>)}</div>}
-            <button className="primary-button" type="submit" disabled={!canConfirm || checkInInFlightRef.current}>{state === "CHECKING_IN" ? "Checking in..." : "Confirm Check-in"}</button>
+            <legend>{mode === "MANUAL" ? "Check-in thủ công" : "Xác nhận check-in"}</legend>
+            <label className="confirmed-plate-field">Biển số đã xác nhận<input value={confirmedPlate} onChange={(event) => setConfirmedPlate(event.target.value)} placeholder={mode === "MANUAL" ? "Nhập biển số" : "Chờ gợi ý biển số"} required /></label>
+            <div className="gate-fields"><label>Loại xe<select value={vehicleType} onChange={(event) => setVehicleType(event.target.value as "MOTORBIKE" | "CAR")}><option value="MOTORBIKE">Xe máy</option><option value="CAR">Ô tô</option></select></label><label>Cổng vào<input value={entryGate} onChange={(event) => setEntryGate(event.target.value)} required /></label></div>
+            <label>Mã đặt chỗ <span>(tùy chọn)</span><input value={reservationCode} onChange={(event) => setReservationCode(event.target.value)} /></label>
+            {ocr && mode === "CAMERA" && <div className="ocr-readout"><p><strong>Gợi ý OCR: {ocr.candidatePlate ?? "Không có biển số chắc chắn"}</strong></p><p>Chuẩn hóa: {ocr.normalizedCandidatePlate ?? "—"} · {ocr.provider} · {(ocr.confidence * 100).toFixed(0)}%</p>{ocr.warnings.map((warning) => <p key={warning}>{warning}</p>)}</div>}
+            <button className="primary-button" type="submit" disabled={!canConfirm || checkInInFlightRef.current}>{state === "CHECKING_IN" ? "Đang check-in…" : "Xác nhận check-in"}</button>
           </fieldset>
         </form>
         {notice && <p className="gate-notice" role="status">{notice}</p>}
@@ -331,6 +336,6 @@ export function StaffGateEntryPage() {
       </div>
     </section>
 
-    {state === "QR_READY" && session && <section className="gate-ticket" aria-live="polite"><div><span className="ticket-code">Customer ticket</span><h2>Check-in confirmed</h2><p><strong>{session.sessionCode}</strong> · {session.vehiclePlate}</p><p>{session.entryTime ? new Date(session.entryTime).toLocaleString() : "Entry time recorded"} · {session.paymentStatus ?? "UNPAID"}</p></div><div className="ticket-link-box"><span>Customer ticket link</span><code>{ticketUrl}</code><div><button type="button" className="secondary-button" onClick={() => ticketUrl && void copyTicketLink(ticketUrl)}>Copy link</button>{ticketUrl && <a className="primary-button" href={ticketUrl} target="_blank" rel="noreferrer">Open Ticket</a>}</div></div>{session.qrLookupToken && <p className="qr-token">Lookup token: <code>{session.qrLookupToken}</code></p>}<p className="security-notice">This QR ticket lets the customer view the ticket. It does not authorize exit.</p><button type="button" className="primary-button" onClick={nextVehicle}>Next Vehicle</button></section>}
+    {state === "QR_READY" && session && <section className="gate-ticket gate-ticket--success" aria-live="polite"><div className="gate-success-intro"><span className="ticket-code">Check-in thành công</span><h2>Đã cấp QR ticket cho khách</h2><p><strong>{session.sessionCode}</strong> · {session.vehiclePlate}</p><p>{session.entryTime ? new Date(session.entryTime).toLocaleString("vi-VN") : "Đã ghi nhận giờ vào"} · {session.paymentStatus ?? "UNPAID"}</p></div><div className="ticket-link-box"><span>Liên kết vé khách hàng</span><code>{ticketUrl}</code><div><button type="button" className="secondary-button" onClick={() => ticketUrl && void copyTicketLink(ticketUrl)}>Sao chép liên kết</button>{ticketUrl && <a className="primary-button" href={ticketUrl} target="_blank" rel="noreferrer">Mở vé</a>}</div></div>{session.qrLookupToken && <div className="lookup-token-box"><span>Lookup token</span><code>{session.qrLookupToken}</code></div>}<div className="security-notice"><strong>QR này chỉ dùng để xem vé, không phải Exit Pass.</strong><p>Khách cần Exit Pass hợp lệ sau thanh toán để thực hiện check-out.</p></div><button type="button" className="primary-button next-vehicle-button" onClick={nextVehicle}>Xe tiếp theo</button></section>}
   </main>;
 }

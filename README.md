@@ -4,6 +4,8 @@ ParkFlow Mall is a microservice-oriented smart parking and reservation managemen
 
 ## Current implementation status
 
+UI-02 - Staff Operations Pages Deep Polish is complete. `/staff/gate-entry` is now the primary live-demo console, with clearer camera, recognition, manual-fallback, confirmation, and customer QR-result areas. `/dashboard`, `/staff/offline`, and `/staff/ocr-checkin` have more readable operational status, tables, empty states, and responsive layouts. This is visual-only work: existing JWT entry, API requests, camera/OCR behavior, and business rules are unchanged.
+
 UI-01 - Frontend Design System and App Shell Revamp is complete. The React app now uses a lightweight custom design system, responsive staff/admin AppShell navigation, and a separate customer-facing public shell. Existing API calls and all established routes remain unchanged: `/`, `/tickets/:lookupToken`, `/reservations/new`, `/reservations/:reservationCode`, `/merchant/validate`, `/staff/offline`, `/staff/ocr-checkin`, `/staff/gate-entry`, and `/dashboard`.
 
 Demo navigation: use the public homepage for customer ticket/reservation entry; use the sidebar on staff/admin pages for Dashboard, Gate Entry, OCR Upload, Offline Sync, Merchant Invoice Validation, and Reservation. The UI keeps demo JWT entry on the existing staff tools; it does not introduce a new login flow.
