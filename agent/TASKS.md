@@ -133,3 +133,11 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 | T-1202 | Document Railway/Supabase/hybrid deployment | P1 | Service mapping, ports, storage, and webhook ingress documented | TODO |
 | T-1203 | Verify environment variable contract | P1 | Deployment variables match `.env.example` | TODO |
 | T-1204 | Prepare demo readiness notes | P1 | Demo covers core flow, offline, QR security, aggregation, and reconciliation | TODO |
+
+## UI-01 - Frontend Design System and App Shell Revamp
+
+| Task ID | Task | Priority | Acceptance Criteria | Status |
+|---|---|---|---|---|
+| UI-0101 | Add responsive shared frontend shells | P1 | Staff/admin routes use `AppShell`; public/customer routes use `PublicShell`; route paths remain unchanged | DONE |
+| UI-0102 | Establish lightweight design system | P1 | Shared tokens and consistent forms, cards, tables, buttons, badges, focus states, and responsive layout exist without a new UI framework | DONE |
+| UI-0103 | Polish core operational and customer routes | P1 | Homepage and existing core pages retain their behavior with responsive visual improvements | DONE |

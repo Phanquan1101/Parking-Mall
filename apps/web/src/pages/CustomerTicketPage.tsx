@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getPublicTicket, TicketApiError } from "../api/ticketApi";
 import type { PublicTicket } from "../types/ticket";
 import { createPaymentOrder, simulatePayment, type PaymentOrder } from "../api/paymentApi";
@@ -77,31 +77,20 @@ export function CustomerTicketPage() {
   }, [lookupToken, retryKey]);
 
   return (
-    <div className="app-shell">
-      <header className="app-header">
-        <div className="header-content">
-          <Link className="brand" to="/">
-            <span aria-hidden="true" className="brand-mark">P</span>
-            ParkFlow Mall
-          </Link>
-          <span className="header-label">Parking ticket</span>
-        </div>
-      </header>
-      <main className="ticket-layout" aria-live="polite">
+    <main className="ticket-layout" aria-live="polite">
         {state === "loading" && <LoadingTicket />}
         {state === "invalid" && <InvalidTicket />}
         {state === "error" && <ErrorTicket onRetry={() => setRetryKey((key) => key + 1)} />}
         {state === "success" && ticket && <TicketSummary ticket={ticket} lookupToken={lookupToken!} order={order} paymentError={paymentError} paymentBusy={paymentBusy} exitPass={exitPass} exitPassError={exitPassError} exitPassBusy={exitPassBusy} onCreate={async()=>{setPaymentBusy(true);setPaymentError(null);try{setOrder(await createPaymentOrder(ticket,lookupToken!));}catch{setPaymentError("Unable to create payment order. Please try again.");}finally{setPaymentBusy(false);}}} onSimulate={async()=>{if(!order)return;setPaymentBusy(true);setPaymentError(null);try{await simulatePayment(order);setRetryKey(key=>key+1);}catch{setPaymentError("Unable to simulate payment. Please verify the order and try again.");}finally{setPaymentBusy(false);}}} onGenerateExitPass={async()=>{setExitPassBusy(true);setExitPassError(null);try{setExitPass(await generateExitPass(ticket.sessionId,lookupToken!));}catch{setExitPassError("Unable to generate an Exit Pass. Please ask parking staff for help.");}finally{setExitPassBusy(false);}}} />}
-      </main>
-    </div>
+    </main>
   );
 }
 
 function LoadingTicket() {
   return (
     <section className="state-panel" aria-busy="true">
-      <h1>Loading ticket...</h1>
-      <p>Retrieving your parking session securely.</p>
+      <h1>Đang tải vé gửi xe…</h1>
+      <p>Đang lấy thông tin phiên gửi xe một cách an toàn.</p>
       <div className="skeleton-sheet" aria-hidden="true">
         <div className="skeleton-line skeleton-line--short" />
         <div className="skeleton-line" />
@@ -115,8 +104,8 @@ function LoadingTicket() {
 function InvalidTicket() {
   return (
     <section className="state-panel state-panel--error">
-      <h1>Ticket not found</h1>
-      <p>Ticket not found or no longer valid.</p>
+      <h1>Không tìm thấy vé</h1>
+      <p>Liên kết vé không hợp lệ hoặc không còn hiệu lực.</p>
     </section>
   );
 }
@@ -124,9 +113,9 @@ function InvalidTicket() {
 function ErrorTicket({ onRetry }: { onRetry: () => void }) {
   return (
     <section className="state-panel state-panel--error">
-      <h1>Unable to load ticket</h1>
-      <p>Unable to load ticket. Please try again or contact parking staff.</p>
-      <button className="primary-button" type="button" onClick={onRetry}>Try again</button>
+      <h1>Không thể tải vé</h1>
+      <p>Vui lòng thử lại hoặc liên hệ nhân viên bãi xe.</p>
+      <button className="primary-button" type="button" onClick={onRetry}>Thử lại</button>
     </section>
   );
 }
@@ -135,9 +124,9 @@ function TicketSummary({ ticket, order, paymentError, paymentBusy, exitPass, exi
   return (
     <>
       <section className="ticket-intro">
-        <span className="ticket-code">Parking session</span>
+        <span className="ticket-code">Vé khách hàng</span>
         <h1>{ticket.sessionCode}</h1>
-        <p>Here is the current summary of your parking session.</p>
+        <p>Thông tin phiên gửi xe và thanh toán hiện tại của bạn.</p>
       </section>
 
       <article className="ticket-sheet" aria-label="Parking ticket summary">

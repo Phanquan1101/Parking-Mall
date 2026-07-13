@@ -314,3 +314,14 @@ Every test should retain the baseline happy-path, invalid-input, unauthorized-ro
 | Offline conflict | Sync returns visible `CONFLICT` | BR-OFF-006 |
 | OCR failure falls back to manual entry | Staff can continue without OCR | BR-OCR-004 |
 | Manual override creates audit log | Override requires reason and creates audit record | BR-AUD-001 |
+
+## 18. UI-01 visual system and route verification
+
+| Test ID | Scenario | Expected Result | Status |
+|---|---|---|---|
+| TC-UI-001 | Web production build | TypeScript and Vite build complete without route/API changes | Automated |
+| TC-UI-002 | Public homepage | ParkFlow branding, customer actions, and ticket-link guidance render | Manual visual verification |
+| TC-UI-003 | Staff app shell navigation | Dashboard, gate entry, OCR, offline, merchant, and reservation links retain their routes and active state | Manual visual verification |
+| TC-UI-004 | Core operations pages | Dashboard, gate-entry, OCR upload, offline queue, and merchant validation load within the shared shell | Manual visual verification |
+| TC-UI-005 | Customer and reservation pages | Ticket and reservation routes retain their existing behavior and responsive public layout | Manual visual verification |
+| TC-UI-006 | Responsive/accessibility baseline | Keyboard focus is visible, labels remain associated with controls, and data tables scroll on narrow screens | Manual visual verification |

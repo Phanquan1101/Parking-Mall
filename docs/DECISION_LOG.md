@@ -281,6 +281,13 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: These controls reduce operator noise and accidental duplicate submissions without assigning security or business authority to the browser.
 - Consequences: The cooldown is transient UX state and can be explicitly cleared by staff. Parking Service's active-plate validation remains the source of truth. Manual fallback calls the unchanged normal check-in API with `plateSource=MANUAL`; no images are persisted and no Gemini key reaches the frontend.
 
+## ADR-041
+
+- Status: Accepted
+- Decision: UI-01 uses a lightweight custom React/CSS design system; staff/admin routes render inside an `AppShell`, while customer and reservation routes render inside a `PublicShell`.
+- Rationale: The existing Vite frontend needs a consistent, responsive demo-ready experience without adding a heavyweight UI dependency or changing any backend/API behavior.
+- Consequences: Shared color, spacing, form, table, badge, and focus styles are maintained in the frontend only. Existing route paths, JWT entry, requests, response handling, camera state machine, and business rules remain unchanged.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?
