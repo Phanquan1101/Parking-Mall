@@ -1,9 +1,256 @@
 package com.parkflow.mall.merchant.service;
-import com.parkflow.mall.merchant.dto.*; import com.parkflow.mall.merchant.model.*; import com.parkflow.mall.merchant.repository.InvoiceValidationRepository; import com.parkflow.mall.merchant.security.MerchantUser; import java.time.Instant; import java.util.*; import org.springframework.beans.factory.annotation.Value; import org.springframework.http.*; import org.springframework.stereotype.Service; import org.springframework.web.client.*; import org.springframework.web.server.ResponseStatusException;
-@Service public class MerchantValidationService { private final InvoiceValidationRepository repo; private final RestTemplate rest; private final String parkingUrl,internalToken; private final long threshold,discount;
- public MerchantValidationService(InvoiceValidationRepository r,RestTemplate t,@Value("${merchant.parking-base-url}")String p,@Value("${merchant.internal-service-token}")String i,@Value("${merchant.discount-threshold}")long th,@Value("${merchant.discount-amount}")long d){repo=r;rest=t;parkingUrl=p;internalToken=i;threshold=th;discount=d;}
- public synchronized InvoiceValidationResponse validate(ValidateInvoiceRequest req,MerchantUser user){ if(req==null||blank(req.lookupToken())||blank(req.invoiceCode())) throw bad("lookupToken and invoiceCode are required"); if(req.invoiceAmount()<=0)throw bad("invoiceAmount must be positive"); if(repo.existsByInvoiceCode(req.invoiceCode()))throw new ResponseStatusException(HttpStatus.CONFLICT,"DUPLICATE_INVOICE"); String tenant=tenant(user); Map<?,?> ticket=lookup(req.lookupToken()); String sessionId=String.valueOf(ticket.get("sessionId")), code=String.valueOf(ticket.get("sessionCode")); if("EXITED".equals(ticket.get("status")))throw new ResponseStatusException(HttpStatus.CONFLICT,"Session already exited"); List<InvoiceValidation> previous=repo.findBySessionId(sessionId); long total=previous.stream().mapToLong(InvoiceValidation::invoiceAmount).sum()+req.invoiceAmount(); long estimated=((Number)ticket.get("estimatedFee")).longValue(); long applied=total>=threshold?Math.min(discount,estimated):0; Map<?,?> update=updateParking(sessionId,total,applied,user.username()); InvoiceValidation v=new InvoiceValidation(UUID.randomUUID().toString(),sessionId,code,tenant,user.username(),req.invoiceCode().trim(),req.invoiceAmount(),InvoiceValidationStatus.ACCEPTED,Instant.now()); repo.save(v); return response(v,total,applied,((Number)update.get("finalFee")).longValue(),"Invoice accepted and parking discount updated."); }
- public ValidationHistoryResponse history(String sessionId,MerchantUser user){tenant(user); List<InvoiceValidation> all=repo.findBySessionId(sessionId); if(!user.roles().contains("ADMIN"))all=all.stream().filter(v->v.tenantId().equals("tenant-demo-001")).toList(); long total=all.stream().mapToLong(InvoiceValidation::invoiceAmount).sum(); long applied=total>=threshold?discount:0; return new ValidationHistoryResponse(sessionId,"AGGREGATE_INVOICE",total,applied,all.stream().map(v->response(v,total,applied,0,"Accepted")).toList());}
- private Map<?,?> lookup(String token){try{return rest.getForObject(parkingUrl+"/api/public/tickets/"+token,Map.class);}catch(HttpClientErrorException e){throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invalid parking lookup token");}catch(ResourceAccessException e){throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"Parking service unavailable");}}
- private Map<?,?> updateParking(String id,long total,long amount,String user){try{HttpHeaders h=new HttpHeaders();h.setContentType(MediaType.APPLICATION_JSON);h.set("X-Internal-Service-Token",internalToken);Map<String,Object>b=Map.of("source","MERCHANT_VALIDATION","totalEligibleInvoiceAmount",total,"discountAmount",amount,"discountPolicy","AGGREGATE_INVOICE","updatedBy","merchant-service:"+user);return rest.exchange(parkingUrl+"/internal/parking/sessions/"+id+"/discount",HttpMethod.POST,new HttpEntity<>(b,h),Map.class).getBody();}catch(RestClientException e){throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"Parking discount update failed");}}
- private String tenant(MerchantUser u){if(u.roles().contains("ADMIN"))return "tenant-demo-admin";if("merchant".equals(u.username()))return "tenant-demo-001";throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Merchant tenant is not authorized");} private InvoiceValidationResponse response(InvoiceValidation v,long total,long disc,long finalFee,String msg){return new InvoiceValidationResponse(v.id(),v.sessionId(),v.sessionCode(),v.tenantId(),v.invoiceCode(),v.invoiceAmount(),total,"AGGREGATE_INVOICE",disc,finalFee,v.status().name(),msg);} private boolean blank(String s){return s==null||s.isBlank();} private ResponseStatusException bad(String m){return new ResponseStatusException(HttpStatus.BAD_REQUEST,m);} }
+
+import com.parkflow.mall.merchant.dto.*;
+import com.parkflow.mall.merchant.model.*;
+import com.parkflow.mall.merchant.repository.InvoiceValidationRepository;
+import com.parkflow.mall.merchant.security.MerchantUser;
+import java.time.Instant;
+import java.util.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.*;
+import org.springframework.web.server.ResponseStatusException;
+
+@Service
+public class MerchantValidationService {
+
+ private final InvoiceValidationRepository repo;
+ private final RestTemplate rest;
+ private final String parkingUrl, internalToken;
+ private final long threshold, discount;
+
+ public MerchantValidationService(
+         InvoiceValidationRepository r,
+         RestTemplate t,
+         @Value("${merchant.parking-base-url}") String p,
+         @Value("${merchant.internal-service-token}") String i,
+         @Value("${merchant.discount-threshold}") long th,
+         @Value("${merchant.discount-amount}") long d) {
+
+  repo = r;
+  rest = t;
+  parkingUrl = p;
+  internalToken = i;
+  threshold = th;
+  discount = d;
+ }
+
+ public synchronized InvoiceValidationResponse validate(
+         ValidateInvoiceRequest req,
+         MerchantUser user) {
+
+  if (req == null || blank(req.lookupToken()) || blank(req.invoiceCode())) {
+   throw bad("lookupToken and invoiceCode are required");
+  }
+
+  if (req.invoiceAmount() <= 0) {
+   throw bad("invoiceAmount must be positive");
+  }
+
+  if (repo.existsByInvoiceCode(req.invoiceCode())) {
+   throw new ResponseStatusException(
+           HttpStatus.CONFLICT,
+           "DUPLICATE_INVOICE"
+   );
+  }
+
+  String tenant = tenant(user);
+
+  Map<?, ?> ticket = lookup(req.lookupToken());
+
+  String sessionId = String.valueOf(ticket.get("sessionId"));
+  String code = String.valueOf(ticket.get("sessionCode"));
+
+  if ("EXITED".equals(ticket.get("status"))) {
+   throw new ResponseStatusException(
+           HttpStatus.CONFLICT,
+           "Session already exited"
+   );
+  }
+
+  List<InvoiceValidation> previous =
+          repo.findBySessionId(sessionId);
+
+  long total =
+          previous.stream()
+                  .mapToLong(InvoiceValidation::invoiceAmount)
+                  .sum()
+                  + req.invoiceAmount();
+
+  long estimated =
+          ((Number) ticket.get("estimatedFee")).longValue();
+
+  long applied =
+          total >= threshold
+                  ? Math.min(discount, estimated)
+                  : 0;
+
+  Map<?, ?> update = updateParking(
+          sessionId,
+          total,
+          applied,
+          user.username()
+  );
+
+  InvoiceValidation v = new InvoiceValidation(
+          UUID.randomUUID().toString(),
+          sessionId,
+          code,
+          tenant,
+          user.username(),
+          req.invoiceCode().trim(),
+          req.invoiceAmount(),
+          InvoiceValidationStatus.ACCEPTED,
+          Instant.now()
+  );
+
+  repo.save(v);
+
+  return response(
+          v,
+          total,
+          applied,
+          ((Number) update.get("finalFee")).longValue(),
+          "Invoice accepted and parking discount updated."
+  );
+ }
+
+ public ValidationHistoryResponse history(
+         String sessionId,
+         MerchantUser user) {
+
+  tenant(user);
+
+  List<InvoiceValidation> all =
+          repo.findBySessionId(sessionId);
+
+  if (!user.roles().contains("ADMIN")) {
+   all = all.stream()
+           .filter(v -> v.tenantId().equals("tenant-demo-001"))
+           .toList();
+  }
+
+  long total =
+          all.stream()
+                  .mapToLong(InvoiceValidation::invoiceAmount)
+                  .sum();
+
+  long applied =
+          total >= threshold ? discount : 0;
+
+  return new ValidationHistoryResponse(
+          sessionId,
+          "AGGREGATE_INVOICE",
+          total,
+          applied,
+          all.stream()
+                  .map(v -> response(v, total, applied, 0, "Accepted"))
+                  .toList()
+  );
+ }
+
+ private Map<?, ?> lookup(String token) {
+  try {
+   return rest.getForObject(
+           parkingUrl + "/api/public/tickets/" + token,
+           Map.class
+   );
+
+  } catch (HttpClientErrorException e) {
+   throw new ResponseStatusException(
+           HttpStatus.NOT_FOUND,
+           "Invalid parking lookup token"
+   );
+
+  } catch (ResourceAccessException e) {
+   throw new ResponseStatusException(
+           HttpStatus.BAD_GATEWAY,
+           "Parking service unavailable"
+   );
+  }
+ }
+
+ private Map<?, ?> updateParking(
+         String id,
+         long total,
+         long amount,
+         String user) {
+
+  try {
+   HttpHeaders h = new HttpHeaders();
+   h.setContentType(MediaType.APPLICATION_JSON);
+   h.set("X-Internal-Service-Token", internalToken);
+
+   Map<String, Object> b = Map.of(
+           "source", "MERCHANT_VALIDATION",
+           "totalEligibleInvoiceAmount", total,
+           "discountAmount", amount,
+           "discountPolicy", "AGGREGATE_INVOICE",
+           "updatedBy", "merchant-service:" + user
+   );
+
+   return rest.exchange(
+           parkingUrl + "/internal/parking/sessions/" + id + "/discount",
+           HttpMethod.POST,
+           new HttpEntity<>(b, h),
+           Map.class
+   ).getBody();
+
+  } catch (RestClientException e) {
+   throw new ResponseStatusException(
+           HttpStatus.BAD_GATEWAY,
+           "Parking discount update failed"
+   );
+  }
+ }
+
+ private String tenant(MerchantUser u) {
+  if (u.roles().contains("ADMIN")) {
+   return "tenant-demo-admin";
+  }
+
+  if ("merchant".equals(u.username())) {
+   return "tenant-demo-001";
+  }
+
+  throw new ResponseStatusException(
+          HttpStatus.FORBIDDEN,
+          "Merchant tenant is not authorized"
+  );
+ }
+
+ private InvoiceValidationResponse response(
+         InvoiceValidation v,
+         long total,
+         long disc,
+         long finalFee,
+         String msg) {
+
+  return new InvoiceValidationResponse(
+          v.id(),
+          v.sessionId(),
+          v.sessionCode(),
+          v.tenantId(),
+          v.invoiceCode(),
+          v.invoiceAmount(),
+          total,
+          "AGGREGATE_INVOICE",
+          disc,
+          finalFee,
+          v.status().name(),
+          msg
+  );
+ }
+
+ private boolean blank(String s) {
+  return s == null || s.isBlank();
+ }
+
+ private ResponseStatusException bad(String m) {
+  return new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          m
+  );
+ }
+}

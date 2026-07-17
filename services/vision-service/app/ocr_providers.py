@@ -5,8 +5,10 @@ from __future__ import annotations
 import json
 import math
 import re
+from functools import lru_cache
 from dataclasses import dataclass
-from typing import Callable
+from io import BytesIO
+from typing import Callable, Iterable
 
 
 STAFF_CONFIRMATION_WARNING = "Staff confirmation is required before check-in."
@@ -138,13 +140,125 @@ Extract only the license plate text. Support motorbike and car plates. Preserve 
             )
 
 
+class PaddlePlateOcrProvider:
+    """CPU-only, local OCR assistance for live gate camera frames.
+
+    The Paddle model is cached once per Vision Service process. No image bytes
+    are written to disk and no OCR request leaves the container.
+    """
+
+    name = "PADDLE_OCR"
+
+    def __init__(
+        self,
+        recognize_text: Callable[[bytes, str], list[tuple[str, float]]] | None = None,
+    ) -> None:
+        self._recognize_text = recognize_text or self._recognize_with_paddle
+
+    def recognize(self, image_bytes: bytes, content_type: str, filename: str | None) -> OcrResult:
+        del filename
+        try:
+            lines = self._recognize_text(image_bytes, content_type)
+        except OcrProviderConfigurationError:
+            raise
+        except Exception as exc:  # Keep local runtime details out of the HTTP response.
+            raise OcrProviderUnavailableError("PaddleOCR request failed") from exc
+
+        candidate, matched_scores = _find_vietnamese_plate(lines)
+        confidence = min(matched_scores) if matched_scores else 0.0
+        return OcrResult(
+            candidate_plate=candidate,
+            normalized_candidate_plate=normalize_plate(candidate),
+            confidence=clamp_confidence(confidence),
+            provider=self.name,
+            warnings=[] if candidate else ["PaddleOCR did not find a readable plate; enter it manually."],
+        )
+
+    def _recognize_with_paddle(self, image_bytes: bytes, content_type: str) -> list[tuple[str, float]]:
+        del content_type
+        try:
+            import cv2
+            import numpy as np
+            from PIL import Image
+        except ImportError as exc:
+            raise OcrProviderConfigurationError("PaddleOCR image dependencies are unavailable") from exc
+
+        with Image.open(BytesIO(image_bytes)) as source:
+            frame = np.asarray(source.convert("RGB"))
+        ocr = _get_paddle_ocr()
+        original_lines = _extract_paddle_lines(ocr.ocr(frame, cls=True))
+        if _find_vietnamese_plate(original_lines)[0] is not None:
+            return original_lines
+
+        # Camera frames are normally landscape and must stay single-pass for
+        # responsive scanning. Portrait uploads can contain a rotated plate;
+        # try the remaining orientations only after the first pass finds none.
+        if frame.shape[0] <= frame.shape[1]:
+            return original_lines
+        for rotation in (cv2.ROTATE_90_COUNTERCLOCKWISE, cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180):
+            rotated_lines = _extract_paddle_lines(ocr.ocr(cv2.rotate(frame, rotation), cls=True))
+            if _find_vietnamese_plate(rotated_lines)[0] is not None:
+                return rotated_lines
+        return original_lines
+
+
+@lru_cache(maxsize=1)
+def _get_paddle_ocr():
+    """Initialize the CPU model once; later camera frames reuse it."""
+    try:
+        from paddleocr import PaddleOCR
+    except ImportError as exc:
+        raise OcrProviderConfigurationError("PaddleOCR is unavailable") from exc
+
+    return PaddleOCR(use_angle_cls=True, lang="en", show_log=False)
+
+
+def _extract_paddle_lines(results: Iterable[object]) -> list[tuple[str, float]]:
+    """Extract text/confidence from the lightweight PaddleOCR detection result."""
+    lines: list[tuple[str, float]] = []
+    for page in results or []:
+        for detection in page or []:
+            if not isinstance(detection, (list, tuple)) or len(detection) < 2:
+                continue
+            recognition = detection[1]
+            if not isinstance(recognition, (list, tuple)) or len(recognition) < 2:
+                continue
+            text, score = recognition[0], recognition[1]
+            if isinstance(text, str) and text.strip():
+                lines.append((text.strip(), clamp_confidence(score)))
+    return lines
+
+
+def _find_vietnamese_plate(lines: list[tuple[str, float]]) -> tuple[str | None, list[float]]:
+    """Join adjacent detected lines so two-row motorbike plates are recognized."""
+    normalized_lines = [(normalize_plate(text), score) for text, score in lines]
+    normalized_lines = [(text, score) for text, score in normalized_lines if text]
+    for start in range(len(normalized_lines)):
+        compact = ""
+        scores: list[float] = []
+        for end in range(start, min(start + 4, len(normalized_lines))):
+            compact += normalized_lines[end][0]
+            scores.append(normalized_lines[end][1])
+            match = re.search(r"[0-9]{2}[A-Z][0-9][0-9]{4,5}", compact)
+            if match:
+                return _format_vietnamese_plate(match.group(0)), scores
+    return None, []
+
+
+def _format_vietnamese_plate(compact: str) -> str:
+    prefix, suffix = compact[:4], compact[4:]
+    return f"{prefix[:2]}-{prefix[2:]} {suffix[:-2]}.{suffix[-2:]}"
+
+
 def create_ocr_provider(provider_name: str, api_key: str, model: str):
     selected_provider = provider_name.strip().upper()
     if selected_provider == DemoPlateOcrProvider.name:
         return DemoPlateOcrProvider()
     if selected_provider == GeminiPlateOcrProvider.name:
         return GeminiPlateOcrProvider(api_key=api_key, model=model)
-    raise OcrProviderConfigurationError("VISION_OCR_PROVIDER must be DEMO_OCR or GEMINI")
+    if selected_provider == PaddlePlateOcrProvider.name:
+        return PaddlePlateOcrProvider()
+    raise OcrProviderConfigurationError("VISION_OCR_PROVIDER must be DEMO_OCR, GEMINI, or PADDLE_OCR")
 
 
 def _strip_markdown_fence(value: object) -> str:

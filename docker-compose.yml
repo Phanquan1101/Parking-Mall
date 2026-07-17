@@ -96,6 +96,8 @@ services:
       OCR_LOW_CONFIDENCE_THRESHOLD: ${OCR_LOW_CONFIDENCE_THRESHOLD:-0.75}
     ports:
       - "${FULLSTACK_VISION_HOST_PORT:-18090}:8090"
+    volumes:
+      - paddleocr-model-cache:/root/.paddleocr
 
   api-gateway:
     build:
@@ -130,3 +132,4 @@ services:
 
 volumes:
   parkflow-postgres-data:
+  paddleocr-model-cache:

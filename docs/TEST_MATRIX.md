@@ -291,6 +291,10 @@ Every test should retain the baseline happy-path, invalid-input, unauthorized-ro
 | TC-OCR-022 | Gate Entry retry and camera failure handling | Low confidence retries quietly; timeout/network backs off; auth/provider errors stop scanning; camera deny/disconnect is actionable | Manual demo |
 | TC-OCR-023 | Gate Entry manual fallback | Manual plate entry submits `plateSource=MANUAL` with no OCR metadata and still uses ordinary Parking validation | Manual demo |
 | TC-OCR-024 | Gate Entry next-vehicle reset | Ticket, candidate, OCR state, and errors clear; an active camera resumes scanning without clearing cooldown implicitly | Manual demo |
+| TC-OCR-025 | PaddleOCR two-row motorbike plate | Local CPU provider joins `89-F1` and `555.55`, returns normalized `89F155555`, and retains staff confirmation | Automated |
+| TC-OCR-026 | PaddleOCR no-plate fallback | Local OCR returns nullable candidate and manual-entry warning without blocking check-in | Automated |
+| TC-OCR-027 | PaddleOCR live-camera smoke test | After first model warm-up (retained in the Docker cache volume), browser camera receives a local `PADDLE_OCR` candidate; no Gemini key, quota, or external OCR call is required | Manual Docker demo |
+| TC-OCR-028 | PaddleOCR rotated portrait fallback | A portrait image with no first-pass candidate is retried at alternate rotations; a plausible candidate still requires staff correction/confirmation | Automated + manual Docker demo |
 
 ## 17. Slice 11A automated dashboard coverage
 
@@ -359,6 +363,7 @@ Every test should retain the baseline happy-path, invalid-input, unauthorized-ro
 | TC-UI-044 | Error and empty states | Missing/invalid JWT, ticket/reservation not found, API errors, empty data, camera/OCR failures, and duplicate plate feedback remain readable | Manual visual verification |
 | TC-UI-045 | Responsive QA | Public routes remain mobile-friendly; staff tables scroll and controls remain usable at tablet/laptop widths | Manual visual verification |
 | TC-UI-046 | Web production build | TypeScript and Vite production build completes | Automated |
+| TC-UI-047 | Camera state and QR ticket handoff | A running camera reports its physical state, pasting a valid staff JWT starts OCR scanning, and a successful check-in renders a unique QR Lookup Ticket without changing Exit Pass rules | Manual visual verification |
 
 ## 22. UAT and demo reference
 

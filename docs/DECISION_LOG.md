@@ -309,6 +309,13 @@ All decisions below are accepted and form the documentation source of truth for 
 - Rationale: A consistent journey from reservation through Gate Entry, ticket, merchant discount, payment, Exit Pass, dashboard, and offline mode makes the approved MVP easier to demonstrate safely.
 - Consequences: No backend/API contracts, authentication, payment, Exit Pass, reservation, merchant, OCR, offline, dashboard-data, checkout, persistence, Supabase, or SePay behavior changes.
 
+## ADR-045
+
+- Status: Accepted
+- Decision: Add `PADDLE_OCR` as a local CPU-only Vision Service provider and use it for local Docker camera OCR when external Gemini quota is unavailable.
+- Rationale: The gate-camera workflow needs a no-key, no-quota OCR option for reliable local demos. PaddleOCR can keep its model in the Vision process after its initial load and receives only transient frame bytes.
+- Consequences: The Vision API response contract stays unchanged. `PADDLE_OCR` does not persist images or make external OCR calls. Its candidate remains assistive only; staff confirmation/correction and manual fallback remain mandatory, and no Parking, QR Lookup, Exit Pass, payment, checkout, merchant, reservation, or offline rule changes.
+
 ## Remaining non-blocking questions
 
 - Should OCR accept upload-only or camera frames first for the demo?

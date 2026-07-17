@@ -115,6 +115,7 @@ Audit/Fraud is cross-cutting. Add audit and suspicious-state acceptance criteria
 | T-1005 | Add backend Gemini OCR provider | P1 | `DEMO_OCR` remains default; backend-only Gemini is configurable and mocked in tests | DONE |
 | T-1006 | Implement Live Camera Gate Entry | P1 | Browser camera, throttled OCR assist, staff confirmation, and customer Lookup Ticket handoff work without Parking rule changes | DONE |
 | T-1007 | Harden Gate Entry stability | P1 | Cooldown, single-submit guard, backoff, camera recovery, manual fallback, and safe reset work without changing Parking rules | DONE |
+| T-1008 | Add local PaddleOCR provider | P1 | CPU-only `PADDLE_OCR` supports realtime camera assistance without an API key or external quota; staff confirmation/manual fallback remain mandatory | DONE |
 
 ## Slice 11 - Dashboard
 

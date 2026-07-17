@@ -2,6 +2,7 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ApiRequestError, ocrAssistedCheckIn, recognizePlate, type OcrResult, type ParkingCheckInResponse } from "../api/visionApi";
 import { isPlateInCooldown, pruneExpiredPlateCooldowns, rememberLockedPlate } from "../camera/gateEntryCooldown";
 import { buildManualCheckInPayload, buildOcrCheckInPayload, customerTicketUrl, GateEntryState, retryBackoffMs, SCAN_COOLDOWN_MS, shouldLockCandidate } from "../camera/gateEntryState";
+import { TicketLookupQr } from "../components/ui/TicketLookupQr";
 
 type EntryMode = "CAMERA" | "MANUAL";
 
@@ -133,7 +134,7 @@ export function StaffGateEntryPage() {
       }
       setScanDelayMs(SCAN_COOLDOWN_MS);
       setState(token.trim() ? "SCANNING" : "CAMERA_IDLE");
-      if (!token.trim()) setNotice("Paste an ADMIN or PARKING_STAFF JWT to start recognition.");
+      if (!token.trim()) setNotice("Camera đã bật. Dán JWT ADMIN hoặc PARKING_STAFF để bắt đầu nhận diện biển số.");
     } catch (cameraError) {
       stopStream();
       setError(cameraErrorMessage(cameraError));
@@ -147,6 +148,13 @@ export function StaffGateEntryPage() {
     setState("CAMERA_IDLE");
   }, [stopStream]);
 
+  useEffect(() => {
+    if (state !== "CAMERA_IDLE" || mode !== "CAMERA" || !streamRef.current || !token.trim()) return;
+    setError("");
+    setNotice("Camera đã bật. Đang bắt đầu nhận diện biển số.");
+    setState("SCANNING");
+  }, [mode, state, token]);
+
   const scanCurrentFrame = useCallback(async () => {
     if (state !== "SCANNING" || mode !== "CAMERA" || !streamRef.current) return;
     if (requestInFlightRef.current) {
@@ -154,7 +162,7 @@ export function StaffGateEntryPage() {
       return;
     }
     if (!token.trim()) {
-      setError("Paste an ADMIN or PARKING_STAFF JWT before scanning.");
+      setError("Dán JWT ADMIN hoặc PARKING_STAFF trước khi quét biển số.");
       setState("ERROR");
       return;
     }
@@ -253,7 +261,7 @@ export function StaffGateEntryPage() {
     event.preventDefault();
     if (checkInInFlightRef.current || state !== "PLATE_READY" || !confirmedPlate.trim() || (mode === "CAMERA" && !ocr)) return;
     if (!token.trim()) {
-      setError("Paste an ADMIN or PARKING_STAFF JWT before check-in.");
+      setError("Dán JWT ADMIN hoặc PARKING_STAFF trước khi check-in.");
       return;
     }
     checkInInFlightRef.current = true;
@@ -300,7 +308,7 @@ export function StaffGateEntryPage() {
   const isCameraRunning = streamRef.current !== null;
   const canConfirm = Boolean(state === "PLATE_READY" && confirmedPlate.trim() && (mode === "MANUAL" || ocr !== null));
   const modeLabel = state === "QR_READY" ? "QR sẵn sàng" : mode === "MANUAL" ? "Nhập thủ công" : "Camera";
-  const cameraStatus = state === "CAMERA_IDLE" ? "Camera chưa bật" : state === "SCANNING" ? "Đang quét" : state === "RECOGNIZING" ? "Đang nhận diện" : state === "PLATE_READY" ? "Đã nhận diện" : state === "ERROR" ? "Lỗi camera" : state === "QR_READY" ? "Đã cấp QR" : "Đang khởi tạo";
+  const cameraStatus = !isCameraRunning ? "Camera chưa bật" : mode === "MANUAL" ? "OCR tạm dừng" : !token.trim() ? "Camera đã bật · chờ JWT" : state === "SCANNING" ? "Đang quét" : state === "RECOGNIZING" ? "Đang nhận diện" : state === "PLATE_READY" ? "Đã nhận diện" : state === "ERROR" ? "Cần kiểm tra camera hoặc OCR" : state === "QR_READY" ? "Đã cấp QR" : "Đang khởi tạo";
 
   return <main className="gate-entry-layout">
     <section className="gate-entry-heading">
@@ -336,6 +344,6 @@ export function StaffGateEntryPage() {
       </div>
     </section>
 
-    {state === "QR_READY" && session && <section className="gate-ticket gate-ticket--success" aria-live="polite"><div className="gate-success-intro"><span className="ticket-code">Check-in thành công</span><h2>Đã cấp QR ticket cho khách</h2><p><strong>{session.sessionCode}</strong> · {session.vehiclePlate}</p><p>{session.entryTime ? new Date(session.entryTime).toLocaleString("vi-VN") : "Đã ghi nhận giờ vào"} · {session.paymentStatus ?? "UNPAID"}</p></div><div className="ticket-link-box"><span>Liên kết vé khách hàng</span><code>{ticketUrl}</code><div><button type="button" className="secondary-button" onClick={() => ticketUrl && void copyTicketLink(ticketUrl)}>Sao chép liên kết</button>{ticketUrl && <a className="primary-button" href={ticketUrl} target="_blank" rel="noreferrer">Mở vé</a>}</div></div>{session.qrLookupToken && <div className="lookup-token-box"><span>Lookup token</span><code>{session.qrLookupToken}</code></div>}<div className="security-notice"><strong>QR này chỉ dùng để xem vé, không phải Exit Pass.</strong><p>Khách cần Exit Pass hợp lệ sau thanh toán để thực hiện check-out.</p></div><button type="button" className="primary-button next-vehicle-button" onClick={nextVehicle}>Xe tiếp theo</button></section>}
+    {state === "QR_READY" && session && <section className="gate-ticket gate-ticket--success" aria-live="polite"><div className="gate-success-intro"><span className="ticket-code">Check-in thành công</span><h2>Đã cấp QR ticket cho khách</h2><p><strong>{session.sessionCode}</strong> · {session.vehiclePlate}</p><p>{session.entryTime ? new Date(session.entryTime).toLocaleString("vi-VN") : "Đã ghi nhận giờ vào"} · {session.paymentStatus ?? "UNPAID"}</p></div>{ticketUrl && <TicketLookupQr ticketUrl={ticketUrl} sessionCode={session.sessionCode} />}<div className="ticket-link-box"><span>Chia sẻ dự phòng</span><p>Nếu khách không thể quét QR, nhân viên có thể sao chép hoặc mở vé trên thiết bị.</p><div><button type="button" className="secondary-button" onClick={() => ticketUrl && void copyTicketLink(ticketUrl)}>Sao chép liên kết</button>{ticketUrl && <a className="primary-button" href={ticketUrl} target="_blank" rel="noreferrer">Mở vé</a>}</div></div><div className="security-notice"><strong>QR này chỉ dùng để xem vé, không phải Exit Pass.</strong><p>Khách cần Exit Pass hợp lệ sau thanh toán để thực hiện check-out.</p></div><button type="button" className="primary-button next-vehicle-button" onClick={nextVehicle}>Xe tiếp theo</button></section>}
   </main>;
 }

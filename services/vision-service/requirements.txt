@@ -3,3 +3,6 @@ uvicorn[standard]==0.34.0
 python-multipart==0.0.20
 httpx==0.28.1
 google-genai==1.30.0
+paddlepaddle==2.6.2
+paddleocr==2.7.3
+Pillow==10.4.0

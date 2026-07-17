@@ -7,7 +7,7 @@ import time
 import unittest
 from fastapi.testclient import TestClient
 from app.main import app
-from app.ocr_providers import GeminiPlateOcrProvider
+from app.ocr_providers import GeminiPlateOcrProvider, PaddlePlateOcrProvider, create_ocr_provider
 from unittest.mock import patch
 
 client = TestClient(app)
@@ -73,6 +73,35 @@ class VisionOcrTests(unittest.TestCase):
         self.assertEqual(0.0, invalid_json.confidence)
         self.assertIn("unreadable", invalid_json.warnings[0])
 
+    def test_paddle_provider_combines_two_row_motorbike_plate(self):
+        provider = PaddlePlateOcrProvider(
+            recognize_text=lambda *_: [("89-F1", 0.96), ("555.55", 0.91)]
+        )
+        result = provider.recognize(b"frame", "image/jpeg", "frame.jpg")
+        self.assertEqual("PADDLE_OCR", result.provider)
+        self.assertEqual("89-F1 555.55", result.candidate_plate)
+        self.assertEqual("89F155555", result.normalized_candidate_plate)
+        self.assertEqual(0.91, result.confidence)
+        self.assertEqual([], result.warnings)
+
+    def test_paddle_provider_returns_manual_fallback_for_non_plate_text(self):
+        provider = PaddlePlateOcrProvider(recognize_text=lambda *_: [("WELCOME", 0.99)])
+        result = provider.recognize(b"frame", "image/jpeg", "frame.jpg")
+        self.assertIsNone(result.candidate_plate)
+        self.assertEqual(0.0, result.confidence)
+        self.assertIn("enter it manually", result.warnings[0])
+
+    def test_paddle_provider_accepts_plate_parts_from_rotated_portrait_capture(self):
+        provider = PaddlePlateOcrProvider(
+            recognize_text=lambda *_: [("89", 0.99), ("E1", 0.99), ("555.", 0.99), ("55", 0.99)]
+        )
+        result = provider.recognize(b"frame", "image/jpeg", "rotated.jpg")
+        self.assertEqual("89-E1 555.55", result.candidate_plate)
+        self.assertEqual("89E155555", result.normalized_candidate_plate)
+
+    def test_paddle_provider_is_selectable_without_an_api_key(self):
+        self.assertIsInstance(create_ocr_provider("PADDLE_OCR", "", "unused"), PaddlePlateOcrProvider)
+
     def test_gemini_missing_key_returns_safe_configuration_error(self):
         headers = {"Authorization": "Bearer " + token("PARKING_STAFF")}
         with patch.dict(os.environ, {"VISION_OCR_PROVIDER": "GEMINI", "GEMINI_API_KEY": ""}):
@@ -92,3 +121,13 @@ class VisionOcrTests(unittest.TestCase):
         self.assertEqual("51F12345", response.json()["normalizedCandidatePlate"])
         self.assertIn("Staff confirmation is required before check-in.", response.json()["warnings"])
         factory.assert_called_once()
+
+    def test_endpoint_uses_mocked_paddle_provider_and_keeps_staff_confirmation(self):
+        headers = {"Authorization": "Bearer " + token("PARKING_STAFF")}
+        provider = PaddlePlateOcrProvider(recognize_text=lambda *_: [("89-F1", 0.95), ("555.55", 0.93)])
+        with patch("app.main.create_ocr_provider", return_value=provider):
+            response = client.post("/api/vision/ocr/plate", headers=headers, files=image("capture.jpg"))
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("PADDLE_OCR", response.json()["provider"])
+        self.assertEqual("89F155555", response.json()["normalizedCandidatePlate"])
+        self.assertIn("Staff confirmation is required before check-in.", response.json()["warnings"])
